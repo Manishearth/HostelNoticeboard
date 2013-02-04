@@ -57,7 +57,7 @@ class App:
         self.imgbbox=[self.windowd[0],self.windowd[1]-self.config['tickerpad'][0]-self.config['tickerpad'][1]-(a[3]-a[1])]
         self.tickerrect=self.can.create_rectangle(0,self.imgbbox[1],self.windowd[0],self.windowd[1],fill=self.config['tickerrectcolor'])
         self.can.tag_lower(self.tickerrect)
-        print "Recommended image size: "+str(self.imgbbox[0])+"x"+str(self.imgbbox[1])
+        print "Recommended image size: "+str(self.imgbbox[0])+"x"+str(self.imgbbox[1])+" (Screen size: "+str(self.windowd[0])+"x"+str(self.windowd[1])+")"
         self.can.move(self.tickertext,-a[0],self.windowd[1]+a[1]-self.config['tickerpad'][1])
         self.tickerstate=0
         
@@ -124,12 +124,15 @@ class App:
                 self.getpiclist()
                 self.picindex=[0]
             self.images[0] = Image.open(self.piclist[self.picindex[0]])
+            self.images[i].thumbnail((self.imgbbox[0],self.imgbbox[1]))
             self.photos[0] = ImageTk.PhotoImage(self.images[0])
             self.imgs[0]=self.can.create_image(self.imgbbox[0]/2,self.imgbbox[1]/2,image=self.photos[0],anchor=CENTER)
         elif self.config['picsatatime']==2:
             for i in range(0,2):
                 self.picindex[i]+=1
-                if self.picindex[i]>=len(self.piclist2[self.config['directories'][i]]): self.picindex[i]=0
+                if self.picindex[i]>=len(self.piclist2[self.config['directories'][i]]): 
+                    self.picindex[i]=0
+                    self.getpiclist()
                 self.images[i]=Image.open(self.piclist2[self.config['directories'][i]][self.picindex[i]])
                 self.images[i].thumbnail((self.imgbbox[0]/2-self.config['tilingpad'][0],self.imgbbox[1]))
                 self.photos[i] = ImageTk.PhotoImage(self.images[i])
@@ -138,7 +141,9 @@ class App:
         elif self.config['picsatatime']==4:
             for i in range(0,4):
                 self.picindex[i]+=1
-                if self.picindex[i]>=len(self.piclist2[self.config['directories'][i]]): self.picindex[i]=0
+                if self.picindex[i]>=len(self.piclist2[self.config['directories'][i]]): 
+                    self.picindex[i]=0
+                    self.getpiclist()
                 self.images[i]=Image.open(self.piclist2[self.config['directories'][i]][self.picindex[i]])
                 self.images[i].thumbnail((self.imgbbox[0]/2-self.config['tilingpad'][0],self.imgbbox[1]/2-self.config['tilingpad'][1]))
                 self.photos[i] = ImageTk.PhotoImage(self.images[i])
