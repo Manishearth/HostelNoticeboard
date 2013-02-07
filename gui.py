@@ -78,6 +78,7 @@ class App:
             self.picindex=[0,0,0,0]
 
             self.imgs=[0,0,0,0]
+            
             self.imgs[0]=self.can.create_image(self.imgbbox[0]/4-self.config['tilingpad'][0],self.imgbbox[1]/4-self.config['tilingpad'][1],image=self.photos[self.config['directories'][0]][self.picindex[0]],anchor=CENTER)
             self.imgs[1]=self.can.create_image(3*self.imgbbox[0]/4+self.config['tilingpad'][0],self.imgbbox[1]/4-self.config['tilingpad'][1],image=self.photos[self.config['directories'][1]][self.picindex[1]],anchor=CENTER)
             self.imgs[2]=self.can.create_image(self.imgbbox[0]/4-self.config['tilingpad'][0],3*self.imgbbox[1]/4+self.config['tilingpad'][1],image=self.photos[self.config['directories'][2]][self.picindex[2]],anchor=CENTER)
@@ -111,6 +112,8 @@ class App:
 
     def movepic(self):
         self.itercount+=1
+        for i in range(0,len(self.imgs)):
+            self.can.delete(self.imgs[i])
         if self.itercount==self.config['refreshcount'][str(self.config['picsatatime'])]:
             self.getpiclist()
             self.itercount=0    
@@ -160,9 +163,12 @@ class App:
                 #print [os.listdir(i)]
                 t2[i]=[os.path.join(i,f) for f in os.listdir(i) if (f.endswith('.png') or f.endswith('.jpg') or f.endswith('.gif'))]
                 temp+=t2[i]
+            x=False
+            if self.piclist==temp:
+                x=True
             self.piclist2=t2 if t2 !={} else self.piclist2
             self.piclist = temp if temp!=[] else self.piclist
-            if t2!={}:
+            if t2!={} and not x:
                 
                 if self.config['picsatatime']==1:
                     self.photos=[]

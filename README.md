@@ -24,7 +24,7 @@ When you run gui.py, it outputs the recommended image size. Please try to make y
                     specified first in the 'directories' configuration key. With 4 pics at a time, the screen is tiled 2x2, and 
                     the first four directories get their own space.
                     */
-   
+   "refreshcount":{"1":10,"2":10,"4":10}, // For given value of picsatatime, after how many iterations should the list be reloaded?
    "picspeed":2000, //Persist the pic for this long (in ms)
    "directories":[ //Directories in which there are tickers/pics
       "Cult",
