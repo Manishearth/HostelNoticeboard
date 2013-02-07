@@ -28,18 +28,21 @@ class App:
         'picspeed':2000, #Switch images every x seconds
         'picsatatime':4, # 1,2, or 4
         'tilingpad':[2,2], #horiz,vert
+        'refreshcount':{1:10,2:10,4:10} #After how many iterations ought I refresh? [PAT1,PAT2,PAT3]
         }
         try:
             x=open('config.json')
             self.config=json.loads(x.read())
             x.close()
-        except:
+        except Exception as e:
             print "Error loading config, using default config"
+            print e
         
         
         self.tickerlist=""
         self.piclist=[]
         self.piclist2={}
+        self.itercount=0
         self.frame = Frame(master)
         self.frame.pack()
         master.geometry("{0}x{1}+0+0".format(master.winfo_screenwidth(), master.winfo_screenheight()))
@@ -51,10 +54,11 @@ class App:
         self.can.pack(expand=True,fill=BOTH)
         self.can.bind('<Double-1>',self.close)
         self.getticker()
-        self.getpiclist()
+
         self.tickertext=self.can.create_text(self.can.canvasx(0),self.can.canvasy(0),text=self.tickerlist,  fill=self.config['tickerstyle'][0], font=self.config['tickerstyle'][1])
         a=self.can.bbox(self.tickertext)
         self.imgbbox=[self.windowd[0],self.windowd[1]-self.config['tickerpad'][0]-self.config['tickerpad'][1]-(a[3]-a[1])]
+        self.getpiclist()
         self.tickerrect=self.can.create_rectangle(0,self.imgbbox[1],self.windowd[0],self.windowd[1],fill=self.config['tickerrectcolor'])
         self.can.tag_lower(self.tickerrect)
         print "Recommended image size: "+str(self.imgbbox[0])+"x"+str(self.imgbbox[1])+" (Screen size: "+str(self.windowd[0])+"x"+str(self.windowd[1])+")"
@@ -63,40 +67,28 @@ class App:
         
         if self.config['picsatatime']==1:
             self.picindex=[0]
-            self.images = [Image.open(self.piclist[0])]
-            self.photos = [ImageTk.PhotoImage(self.images[0])]
             self.imgs=[self.can.create_image(self.imgbbox[0]/2,self.imgbbox[1]/2,image=self.photos[0],anchor=CENTER)]
         elif self.config['picsatatime']==2:
             self.picindex=[0,0]
-            self.images=[0,0]
-            self.photos=[0,0]
+
             self.imgs=[0,0]
-            for i in range(0,2):
-                self.images[i]=Image.open(self.piclist2[self.config['directories'][i]][self.picindex[i]])
-                self.images[i].thumbnail((self.imgbbox[0]/2-self.config['tilingpad'][0],self.imgbbox[1]))
-                self.photos[i] = ImageTk.PhotoImage(self.images[i])
-            self.imgs[0]=self.can.create_image(self.imgbbox[0]/4-self.config['tilingpad'][0],self.imgbbox[1]/2,image=self.photos[0],anchor=CENTER)
-            self.imgs[1]=self.can.create_image(3*self.imgbbox[0]/4+self.config['tilingpad'][0],self.imgbbox[1]/2,image=self.photos[1],anchor=CENTER)
+            self.imgs[0]=self.can.create_image(self.imgbbox[0]/4-self.config['tilingpad'][0],self.imgbbox[1]/2,image=self.photos[self.config['directories'][0]][self.picindex[0]],anchor=CENTER)
+            self.imgs[1]=self.can.create_image(3*self.imgbbox[0]/4+self.config['tilingpad'][0],self.imgbbox[1]/2,image=self.photos[self.config['directories'][1]][self.picindex[1]],anchor=CENTER)
         elif self.config['picsatatime']==4:
             self.picindex=[0,0,0,0]
-            self.images=[0,0,0,0]
-            self.photos=[0,0,0,0]
+
             self.imgs=[0,0,0,0]
-            for i in range(0,4):
-                self.images[i]=Image.open(self.piclist2[self.config['directories'][i]][self.picindex[i]])
-                self.images[i].thumbnail((self.imgbbox[0]/2-self.config['tilingpad'][0],self.imgbbox[1]/2-self.config['tilingpad'][1]))
-                self.photos[i] = ImageTk.PhotoImage(self.images[i])
-            self.imgs[0]=self.can.create_image(self.imgbbox[0]/4-self.config['tilingpad'][0],self.imgbbox[1]/4-self.config['tilingpad'][1],image=self.photos[0],anchor=CENTER)
-            self.imgs[1]=self.can.create_image(3*self.imgbbox[0]/4+self.config['tilingpad'][0],self.imgbbox[1]/4-self.config['tilingpad'][1],image=self.photos[1],anchor=CENTER)
-            self.imgs[2]=self.can.create_image(self.imgbbox[0]/4-self.config['tilingpad'][0],3*self.imgbbox[1]/4+self.config['tilingpad'][1],image=self.photos[2],anchor=CENTER)
-            self.imgs[3]=self.can.create_image(3*self.imgbbox[0]/4+self.config['tilingpad'][0],3*self.imgbbox[1]/4+self.config['tilingpad'][1],image=self.photos[3],anchor=CENTER)
+            self.imgs[0]=self.can.create_image(self.imgbbox[0]/4-self.config['tilingpad'][0],self.imgbbox[1]/4-self.config['tilingpad'][1],image=self.photos[self.config['directories'][0]][self.picindex[0]],anchor=CENTER)
+            self.imgs[1]=self.can.create_image(3*self.imgbbox[0]/4+self.config['tilingpad'][0],self.imgbbox[1]/4-self.config['tilingpad'][1],image=self.photos[self.config['directories'][1]][self.picindex[1]],anchor=CENTER)
+            self.imgs[2]=self.can.create_image(self.imgbbox[0]/4-self.config['tilingpad'][0],3*self.imgbbox[1]/4+self.config['tilingpad'][1],image=self.photos[self.config['directories'][2]][self.picindex[2]],anchor=CENTER)
+            self.imgs[3]=self.can.create_image(3*self.imgbbox[0]/4+self.config['tilingpad'][0],3*self.imgbbox[1]/4+self.config['tilingpad'][1],image=self.photos[self.config['directories'][3]][self.picindex[3]],anchor=CENTER)
         master.after(self.config['tickerspeed'][1],self.moveticker)
         master.after(self.config['picspeed'],self.movepic)
         
 
 
     def moveticker(self):
-
+        
         self.can.move(self.tickertext,-self.config['tickerspeed'][0],0)
 
         a=self.can.bbox(self.tickertext)
@@ -118,39 +110,32 @@ class App:
 
 
     def movepic(self):
+        self.itercount+=1
+        if self.itercount==self.config['refreshcount'][str(self.config['picsatatime'])]:
+            self.getpiclist()
+            self.itercount=0    
         if self.config['picsatatime']==1:
             self.picindex[0]+=1
             if self.picindex[0] >= len(self.piclist):
-                self.getpiclist()
                 self.picindex=[0]
-            self.images[0] = Image.open(self.piclist[self.picindex[0]])
-            self.images[i].thumbnail((self.imgbbox[0],self.imgbbox[1]))
-            self.photos[0] = ImageTk.PhotoImage(self.images[0])
-            self.imgs[0]=self.can.create_image(self.imgbbox[0]/2,self.imgbbox[1]/2,image=self.photos[0],anchor=CENTER)
+            self.imgs[0]=self.can.create_image(self.imgbbox[0]/2,self.imgbbox[1]/2,image=self.photos[self.picindex[0]],anchor=CENTER)
         elif self.config['picsatatime']==2:
             for i in range(0,2):
                 self.picindex[i]+=1
                 if self.picindex[i]>=len(self.piclist2[self.config['directories'][i]]): 
                     self.picindex[i]=0
-                    self.getpiclist()
-                self.images[i]=Image.open(self.piclist2[self.config['directories'][i]][self.picindex[i]])
-                self.images[i].thumbnail((self.imgbbox[0]/2-self.config['tilingpad'][0],self.imgbbox[1]))
-                self.photos[i] = ImageTk.PhotoImage(self.images[i])
-            self.imgs[0]=self.can.create_image(self.imgbbox[0]/4-self.config['tilingpad'][0],self.imgbbox[1]/2,image=self.photos[0],anchor=CENTER)
-            self.imgs[1]=self.can.create_image(3*self.imgbbox[0]/4+self.config['tilingpad'][0],self.imgbbox[1]/2,image=self.photos[1],anchor=CENTER)
+            self.imgs[0]=self.can.create_image(self.imgbbox[0]/4-self.config['tilingpad'][0],self.imgbbox[1]/2,image=self.photos[self.config['directories'][0]][self.picindex[0]],anchor=CENTER)
+            self.imgs[1]=self.can.create_image(3*self.imgbbox[0]/4+self.config['tilingpad'][0],self.imgbbox[1]/2,image=self.photos[self.config['directories'][1]][self.picindex[1]],anchor=CENTER)
         elif self.config['picsatatime']==4:
             for i in range(0,4):
                 self.picindex[i]+=1
                 if self.picindex[i]>=len(self.piclist2[self.config['directories'][i]]): 
                     self.picindex[i]=0
-                    self.getpiclist()
-                self.images[i]=Image.open(self.piclist2[self.config['directories'][i]][self.picindex[i]])
-                self.images[i].thumbnail((self.imgbbox[0]/2-self.config['tilingpad'][0],self.imgbbox[1]/2-self.config['tilingpad'][1]))
-                self.photos[i] = ImageTk.PhotoImage(self.images[i])
-            self.imgs[0]=self.can.create_image(self.imgbbox[0]/4-self.config['tilingpad'][0],self.imgbbox[1]/4-self.config['tilingpad'][1],image=self.photos[0],anchor=CENTER)
-            self.imgs[1]=self.can.create_image(3*self.imgbbox[0]/4+self.config['tilingpad'][0],self.imgbbox[1]/4-self.config['tilingpad'][1],image=self.photos[1],anchor=CENTER)
-            self.imgs[2]=self.can.create_image(self.imgbbox[0]/4-self.config['tilingpad'][0],3*self.imgbbox[1]/4+self.config['tilingpad'][1],image=self.photos[2],anchor=CENTER)
-            self.imgs[3]=self.can.create_image(3*self.imgbbox[0]/4+self.config['tilingpad'][0],3*self.imgbbox[1]/4+self.config['tilingpad'][1],image=self.photos[3],anchor=CENTER)
+                    #self.getpiclist()
+            self.imgs[0]=self.can.create_image(self.imgbbox[0]/4-self.config['tilingpad'][0],self.imgbbox[1]/4-self.config['tilingpad'][1],image=self.photos[self.config['directories'][0]][self.picindex[0]],anchor=CENTER)
+            self.imgs[1]=self.can.create_image(3*self.imgbbox[0]/4+self.config['tilingpad'][0],self.imgbbox[1]/4-self.config['tilingpad'][1],image=self.photos[self.config['directories'][1]][self.picindex[1]],anchor=CENTER)
+            self.imgs[2]=self.can.create_image(self.imgbbox[0]/4-self.config['tilingpad'][0],3*self.imgbbox[1]/4+self.config['tilingpad'][1],image=self.photos[self.config['directories'][2]][self.picindex[2]],anchor=CENTER)
+            self.imgs[3]=self.can.create_image(3*self.imgbbox[0]/4+self.config['tilingpad'][0],3*self.imgbbox[1]/4+self.config['tilingpad'][1],image=self.photos[self.config['directories'][3]][self.picindex[3]],anchor=CENTER)
         self.rt.after(self.config['picspeed'],self.movepic)
 
 
@@ -167,15 +152,41 @@ class App:
 
 
     def getpiclist(self):
-        temp=[]
+
         t2={}
+        temp=[]
         try:
             for i in self.config['directories']:
                 #print [os.listdir(i)]
                 t2[i]=[os.path.join(i,f) for f in os.listdir(i) if (f.endswith('.png') or f.endswith('.jpg') or f.endswith('.gif'))]
                 temp+=t2[i]
-            self.piclist=temp if temp !=[] else self.piclist
-            self.piclist2=t2 if t2 !={} else self.piclist2            
+            self.piclist2=t2 if t2 !={} else self.piclist2
+            self.piclist = temp if temp!=[] else self.piclist
+            if t2!={}:
+                
+                if self.config['picsatatime']==1:
+                    self.photos=[]
+                    for i in range(0,len(temp)):
+                        self.photos+= [Image.open(temp[i])]
+                        self.photos[i].thumbnail((self.imgbbox[0],self.imgbbox[1]))
+                        self.photos[i] = ImageTk.PhotoImage(self.photos[i])
+                elif self.config['picsatatime']==2:
+                    self.photos={}
+                    for i in self.config['directories']:
+                        self.photos[i]=[]
+                        for j in range(0,len(t2[i])):
+                            self.photos[i]+=[Image.open(t2[i][j])]
+                            self.photos[i][j].thumbnail((self.imgbbox[0]/2-self.config['tilingpad'][0],self.imgbbox[1]))
+                            self.photos[i][j] = ImageTk.PhotoImage(self.photos[i][j])
+                elif self.config['picsatatime']==4:
+                    self.photos={}
+                    for i in self.config['directories']:
+                        self.photos[i]=[]
+                        for j in range(0,len(t2[i])):
+                            self.photos[i]+=[Image.open(t2[i][j])]
+                            self.photos[i][j].thumbnail((self.imgbbox[0]/2-self.config['tilingpad'][0],self.imgbbox[1]/2-self.config['tilingpad'][1]))
+                            self.photos[i][j] = ImageTk.PhotoImage(self.photos[i][j])
+            print "Image fetch&parse successful"
         except IOError as e:
             print "I/O error({0}): {1}".format(e.errno, e.strerror)
 
