@@ -2,6 +2,12 @@ HostelNoticeboard
 =================
 
 Electronic noticeboard for IIT Bombay hostels. Meant to run on a Raspberry Pi.
+##Requirements
+
+Python Tkinter and Python Imaging Library
+```
+sudo apt-get install python-tk python-imaging
+```
 
 ##Usage
 Fill subdirectories with .txt files for tickers, and .png, .jpg, or .gif images. Then run gui.py with python 2.7.
@@ -37,4 +43,48 @@ When you run gui.py, it outputs the recommended image size. Please try to make y
    "tickerrectcolor":"red" //Color of the red rectangle around the ticker
 }
 
+```
+
+##Typical directory setup
+```
+|-- gui.py
+|-- config.json
+|-- README.md
+|-- Cult
+|   |-- cult1.png
+|   |-- ticker2.txt
+|   |-- insync.png
+|   |-- cult2.png
+|   `-- ticker.txt
+|-- Hostel
+|   |-- abc.png
+|   |-- def.png
+|   |-- poster final 2.jpg
+|   |-- tickercanteen.txt
+|   |-- tickerdosa.txt
+|   `-- elections.jpg
+|-- Sports
+|   |-- enthubuzz2.png*
+|   |-- enthubuzz.png*
+|   |-- RIS-POS-1.jpg
+|   |-- RIS-POS-2.jpg
+|   |-- RIS-POS-3.jpg
+|   |-- RIS-POS-4.jpg
+|   |-- RIS-POS-5.jpg
+|   |-- Schedule.jpg
+|   |-- sport.png*
+|   |-- Tech GC 3 Scoring.jpg
+|   |-- ticker1.txt~
+|   |-- ticker2.txt
+|   |-- ticker2.txt~
+|   `-- vintage-poster.jpg
+`-- Tech
+    |-- Arpit 1.jpg
+    |-- arpit 2.jpg
+    |-- arpit 3.jpg
+    |-- arpit 4.jpg
+    |-- arpit 5.jpg
+    |-- electrify.png
+    |-- tickertech.txt
+    `-- xlr8.png
 ```
