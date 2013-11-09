@@ -1,0 +1,17 @@
+{
+   "tickerspeed":[1,10],
+   "tilingpad":[2,2],
+   "delimiter":"         ",
+   "canvasbg":"white",
+   "picsatatime":4,
+   "refreshcount":{"1":10,"2":10,"4":10},
+   "picspeed":2000,
+   "directories":[
+      "Cult",
+      "Sports",
+      "Tech",
+      "Hostel"
+   ],
+   "tickerpad":[0,2],
+   "tickerstyle":["white",["Helvectica","18"]],
+   "tickerrectcolor":"black"}
