@@ -1,4 +1,17 @@
- <!DOCTYPE html>
+<?php
+
+$users = array(
+    "User1" => "Password1",
+    "User2" => "Password2",
+);
+
+if ($users[$_POST["user"]]!==$_POST["pass"]) {
+	if ($_POST["attempt"]<5) header('Location: index.php?attempt='.$_POST["attempt"]);
+	if ($_POST["attempt"]>4) header("HTTP/1.1 403 Unauthorized");
+	exit();
+}
+echo '
+<!DOCTYPE html>
 <html>
 <head>
   <title>IIT-Bombay Notice Board</title>
@@ -9,8 +22,8 @@
   <link rel="stylesheet" href="css/style.css">
   <link href="css/bootstrap-responsive.css" rel="stylesheet">
   <link href="css/tablecloth.css" rel="stylesheet">
-  
 </head>
+
 <body>
   <div class="container">
     <div style="width:20%;padding:20px;">
@@ -25,7 +38,7 @@
         <form action="action.php" method="post" class="form-horizontal">
             <div class="form-group">
               <div class="col-lg-3">
-                <input type="hidden" name="name" value="">
+                <input type="hidden" name="user" value="'.$_POST["user"].'">
               </div>
             </div>
             <div class="form-group">  
@@ -89,7 +102,7 @@
 				For complaints and suggestions click <a href="#">here</a> <br>
 			</span>
         </form> 
-        <hr style="border:0.1px solid'"> 
+        <hr style="border:0.1px solid"> 
     </div> 
     <div class="well" id="viewComplaint">
 	  <h2 style="text-align:center">IIT-B Notice Board</h2>
@@ -123,19 +136,21 @@
           $("#viewComplaintBtn").click(function() {
             /* Act on the event */
             $("#postComplaint").fadeOut("slow");
-            $('li').removeClass('active');
-            $('#viewLi').addClass('active');
+            $("li").removeClass("active");
+            $("#viewLi").addClass("active");
             $("#viewComplaint").fadeIn("slow");
           });
           $("#postComplaintBtn").click(function() {
             /* Act on the event */
             $("#postComplaint").fadeIn("slow");
-            $('li').removeClass('active');
-            $('#postLi').addClass('active');
+            $("li").removeClass("active");
+            $("#postLi").addClass("active");
             $("#viewComplaint").fadeOut("slow");
           });
         });
     </script>
 </body>
-</html>
+</html>'
+
+?>
 
