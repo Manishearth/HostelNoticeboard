@@ -1,3 +1,4 @@
+<?php if ( isset($_COOKIE["user"]) && isset($_COOKIE["auth"]) && (!isset($_GET['attempt'])) ) header('Location: interface.php'); ?>
 <!DOCTYPE html>
 <html>
 <head>
@@ -14,7 +15,18 @@
         <h2>  IIT-B Notice Board Login</h2>
         <hr style="border:1px solid">
         <form action="interface.php" method="post" class="form-horizontal" accept-charset="utf-8">
-			<input type="hidden" name="attempt" value=<?php if (isset($_GET['attempt'])) {printf("%d",$_GET['attempt']+1);} else printf("%d",1);?>>
+<?php
+if (isset($_GET['attempt'])) {
+setcookie("user", "", time()-3600);
+echo '            <input type="hidden" name="attempt" value='.($_GET["attempt"]+1).'>';
+echo '            <label class="control-label" style="color: red; font-weight: lighter;">Incorrect username or password</label>';
+}
+else 
+echo '            <input type="hidden" name="attempt" value=1>';
+if (isset($_COOKIE["user"])) 
+echo '            <label class="control-label" style="color: red; font-weight: lighter;">Session expired. Please login again.</label>';
+?>
+
             <div class="control-group">  
                 <label class="control-label" for = "inputEmail"> Username</label>
                 <div class="controls input-append">
