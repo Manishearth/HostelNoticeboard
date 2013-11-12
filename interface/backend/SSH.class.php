@@ -46,14 +46,7 @@ public function connect() {																			//Connects to SSH session
 		echo "Authentication failed. Exiting :(\n";
 		return false;
 	}
-//	else echo "Authenticated :)\n";
-
-//	$shell = ssh2_shell($ssh, 'xterm');
-//	if (!($shell)) return false;
-//	sleep(1);
-//	while($buffer = fgets($shell)) flush();
-//	stream_set_blocking($shell, true);
-
+	user_error("Successfully connected to ".$ssh_host."!");
 	return true;
 }
 
@@ -71,7 +64,7 @@ public function showConnection() {																	//Shows ssh information
 
 	if (!($this->execute("lastlog | grep '".$GLOBALS['ssh_auth_user']."'", $details))) {
 		if ($GLOBALS['keepAlive']!==-1) {
-			if ($this->connect()) return $this->showConnection();
+			if ($this->connect()) {return $this->showConnection();}
 		}
 		echo "Session Disconnected!\n";
 		return false;
@@ -84,6 +77,7 @@ public function execute($command, &$reply = null) {													//Executes comma
 																									//Returns false on failure
 	global $ssh, $FLAG;
 	if ($FLAG !== 0) return false;
+	if (!isset($ssh)) return false;
 
 	$stream = ssh2_exec($ssh, $command.'; Argh=$?; echo "@Arr!="; echo $Argh');
 	$stderr = ssh2_fetch_stream($stream, SSH2_STREAM_STDERR);
@@ -101,7 +95,6 @@ public function execute($command, &$reply = null) {													//Executes comma
 		user_error($stderr);
 	}
 	$buffer = fgets($stream);
-//	echo $reply."\n".$buffer;
 	$ERRORLEVEL = strncmp($buffer,'0',1);
 	if ($ERRORLEVEL!=0) return false;
 	return true;
@@ -112,33 +105,18 @@ public function send($src, $dst, $mode) {
 	if ($FLAG !== 0) return false;
 
 	if (!(ssh2_scp_send($ssh, $src, $dst, $mode))) {
-//		if ($this->showConnection()) {																//showConnection tries to reconnect
-//			ssh2_scp_send($ssh, $src, $dst, $mode);
-//		}
-//		else return false;
+		if ($this->showConnection()) {																//showConnection tries to reconnect
+			ssh2_scp_send($ssh, $src, $dst, $mode);
+		}
+		else return false;
 		return false;
 	}
 	else return true;
 }
 
-public function getErrorNo() {																		//Returns error number
-	return $GLOBALS['FLAG'];
-}
-
-public function getErrorMsg() {																		//Returns friendly error message
-	switch ($GLOBALS['FLAG']) {
-	case 1:
-		return "Authentication failure. Please check your username and password.";
-	case 2:
-		return "Cannot connect to server. To automatically try to reconnect set auto reconnect flag to the desired interval in seconds.\n";
-	default:
-		return "No or unknown error. See log for more details.";
-	}
-}
-
 public function __destruct() { 																		//Destructor
 	global $ssh;
-//	echo 'Closing SSH Connection with '.$GLOBALS['ssh_host'].':'.$GLOBALS['ssh_port']."\n";
+	user_error('Closing SSH Connection with '.$GLOBALS['ssh_host'].':'.$GLOBALS['ssh_port']."\n");
 	$this->execute('exit');
 	$ssh = NULL; 
 }

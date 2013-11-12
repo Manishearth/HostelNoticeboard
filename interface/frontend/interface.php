@@ -1,16 +1,35 @@
 <?php
+define('READ_FILESYSTEM',			0);
+define('WRITE_FILESYSTEM',			1);
+define('DELETE_OTHER_USER_FILES',	2);
+define('ADD_DELETE_USER',       	3);
+define('ADD_DELETE_PI',	       		4);
+
+include 'MySQL.class.php'
+
 $users = array(
     "User1" => "Password1",
     "User2" => "Password2",
 );
 if ( isset($_COOKIE["user"]) && isset($_COOKIE["auth"]) && md5($users[$_COOKIE["user"]])==$_COOKIE["auth"] ) {
-   setcookie("user",$_COOKIE["user"],time()+900);
-   setcookie("auth",$_COOKIE["auth"],time()+600);
+  setcookie("user",$_COOKIE["user"],time()+900);
+  setcookie("auth",$_COOKIE["auth"],time()+600);
 }
 elseif ((isset($_POST["user"]))&&(isset($_POST["pass"]))&&($users[$_POST["user"]]==$_POST["pass"])) {
-   $auth = $_POST["pass"];
-   setcookie("user",$_POST["user"],time()+900);
-   setcookie("auth",md5($auth),time()+600);
+  /*
+  include 'config.inc';
+
+  $dbLink = new mysqli($dbHost, $dbUsername, $dbPassword, $dbName);
+  if (mysqli_connect_error()) {
+	  echo "MySQL Error: ".mysqli_connect_errno() . ' .' . mysqli_connect_error();
+	  die();
+  }
+
+  $sql=
+  */
+  $auth = $_POST["pass"];
+  setcookie("user",$_POST["user"],time()+900);
+  setcookie("auth",md5($auth),time()+600);
 }
 else {
   setcookie("auth", "", time()-3600);
@@ -113,7 +132,9 @@ echo '
             <div class="form-group">
               <label class="control-label col-lg-2">Directive</label>
               <div class="col-lg-3">
-                <select name="task" class="form-control select-picker" id="task" onChange="task_onChange()">
+                <select name="task" class="form-control select-picker" id="task" onChange="task_onChange()">';
+//PHP
+echo '
                   <option value="Copy">Upload File</option>
                   <option value="Delete">Remove File</option>
                   <option value="MkDir">Make Directory</option>

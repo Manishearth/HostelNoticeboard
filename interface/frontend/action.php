@@ -1,10 +1,9 @@
 <?php
-include '../config.inc';
+define('READ_FILESYSTEM',			0);
+define('WRITE_FILESYSTEM',			1);
+define('DELETE_OTHER_USER_FILES',	2);
+define('ADD_DELETE_USER',       	3);
+define('ADD_DELETE_PI',	       		4);
 
-$dbLink = new mysqli($dbHost, $dbUsername, $dbPassword, $dbName);
-if (mysqli_connect_error()) {
-	echo "MySQL Error: ".mysqli_connect_errno() . ' .' . mysqli_connect_error();
-	die();
-}
-$sql = "INSERT ";
+include 'MySQL.class.php'
 ?>
