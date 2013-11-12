@@ -26,17 +26,7 @@ src="$(cd "$src" && pwd)"
 
 echo "Installing backend to '$path'..."
 
-echo "<?php
-\$dbHost = 'localhost';
-\$dbUsername = '$uid';
-\$dbPassword = '$pass';
-\$dbName = 'NoticeBoard';
-\$host = '/home';
-?>" > "$src/config.inc"
-if [ $? != 0 ]
-then echo "Error occured while accessing '$path'"
-     exit -1;
-fi
+#Autostore mysql user n password
 
 cp -rf "$src/backend/"* "$path/"
 cp -f "$src/config.inc" "$path/"

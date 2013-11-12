@@ -5,7 +5,7 @@ define('DELETE_OTHER_USER_FILES',	2);
 define('ADD_DELETE_USER',       	3);
 define('ADD_DELETE_PI',	       		4);
 
-include 'MySQL.class.php'
+include 'MySQL.class.php';
 
 $users = array(
     "User1" => "Password1",
