@@ -22,7 +22,7 @@ create table queue (
 	Path varchar(100) NOT NULL,
 	Date datetime NOT NULL,
 	PiID int(4) NOT NULL,
-	By varchar(20)
+	User varchar(20),
 	PRIMARY KEY (Date)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 

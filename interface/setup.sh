@@ -9,33 +9,36 @@ IMPORTANT: Make sure you have LAMP installed along with ssh2 php library (libssh
            Notice board server will not work without them.
 ########################################################################################"
 
+src="$(dirname ${BASH_SOURCE[0]})"
+src="$(cd "$src" && pwd)"
+echo $src
 read -p "Enter MySQL username:" uid
 stty -echo
 echo "Enter MySQL password:"
 read pass
 stty echo
+
 echo "Creating database..."
-mysql --user=$uid --password=$pass < setup.sql
+mysql --user=$uid --password=$pass < "$src/setup.sql"
 echo "Writing default values..."
-mysql --user=$uid --password=$pass < default.sql
+mysql --user=$uid --password=$pass < "$src/default.sql"
+
+echo "Generating MySQL.class.php..."
+echo "<?php
+class MySQL
+{	
+	private \$dbUsername='$uid';
+	private \$dbPassword='$pass';" > "$src/MySQL.class.php"
+cat "$src/MySQL.class.part" >> "$src/MySQL.class.php"
 
 read -p "Where do I store local copy files:" path
 path="$(cd "$path" && pwd)"
-src="$(dirname ${BASH_SOURCE[0]})"
-src="$(cd "$src" && pwd)"
 
 echo "Installing backend to '$path'..."
-
-#Autostore mysql user n password
-
+echo "\$path='$path/root/'" >> "$src/config.inc"
 cp -rf "$src/backend/"* "$path/"
+cp -f "$src/MySQL.class.php" "$path/"
 cp -f "$src/config.inc" "$path/"
-mkdir "$path/root"
-mkdir "$path/root/Academics"
-mkdir "$path/root/Hostel"
-mkdir "$path/root/Cultural"
-mkdir "$path/root/Technical"
-mkdir "$path/root/Sports"
 
 echo "Creating cronjob..."
 
@@ -45,8 +48,11 @@ read -p "Where do I store index.php (and other frontend files):" wwwpath
 wwwpath="$(cd "$wwwpath" && pwd)"
 
 echo "Installing frontend..."
-cp -rf "$src/frontend/"** "$wwwpath/"
+cp -rf "$src/frontend/"* "$wwwpath/"
+cp -f "$src/MySQL.class.php" "$wwwpath/"
 cp -f "$src/config.inc" "$wwwpath/"
 ln -s "$path/root" "$wwwpath/root"
+
+rm -f "$src/MySQL.class.php"
 
 echo "Installation successful if you saw no errors :P"

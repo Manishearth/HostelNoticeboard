@@ -4,13 +4,17 @@ IIT Bombay Notice Board BackEnd
 
 Author: Kamal Galrani
 Date:	Nov, 8, 2013
-*************************************/
 
-//ini_set("log_errors", 1);
-//ini_set("error_log", "/home/singularity/php-error.log");
+Usage 
+backend.php <PiID> <ssh_host> <ssh_port> <ssh_username> <ssh_password>
+*************************************/
 
 include 'MySQL.class.php';
 include 'SSH.class.php';
+include 'config.inc';
+
+//ini_set("log_errors", 1);
+//ini_set("error_log", backend.php);
 
 //-------------Initialising Variables--------------//
 $PiID = $argv[1];
@@ -28,15 +32,15 @@ $dbLink->loadQueue($PiID);
 while($obj=$dbLink->getNextDirective()) {
 	switch ($obj->Type) {
 	case "Copy":
-		$status = $PI->send("/home/singularity/".$obj->Path,"/home/physics27/".$obj->Path,0644);
+		$status = $PI->send("$path".$obj->Path,$remotepath.$obj->Path,0644);
 		echo "Copy\n";
 		break;
 	case "Delete":
-		$status = $PI->execute("rm -f /home/physics27/".$obj->Path, $dump);
+		$status = $PI->execute("rm -f "$remotepath.$obj->Path, $dump);
 		echo "Delete\n";
 		break;
 	case "MkDir":
-		$status = $PI->execute("mkdir /home/physics27/".$obj->Path, $dump);
+		$status = $PI->execute("mkdir "$remotepath.$obj->Path, $dump);
 		if (stripos($dump, "File Exists")!==false) $status=true; 
 		echo "MkDir\n";
 		break;

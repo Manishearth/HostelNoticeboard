@@ -1,8 +1,3 @@
-<?php
-class MySQL
-{	
-	private $dbUsername='root';
-	private $dbPassword='toor';
 	private $dbHost='localhost';
 	private $dbName='NoticeBoard';
 	private $dbLink;
