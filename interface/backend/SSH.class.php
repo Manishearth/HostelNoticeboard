@@ -1,4 +1,12 @@
 <?php 
+include('Net/SSH2.php');
+include('Net/SCP.php');
+
+//define('NET_SSH2_MASK_CONSTRUCTOR', 0x00000001);
+//define('NET_SSH2_MASK_LOGIN_REQ',   0x00000002);
+//define('NET_SSH2_MASK_LOGIN',       0x00000004);
+//define('NET_SSH2_MASK_SHELL',       0x00000008);
+
 class SSH_Connection
 { 
 
@@ -19,106 +27,95 @@ private $shell;
     
 //-------------Function Definitions--------------//
 
-public function SSH_Connection($ssh_host,$ssh_port,$ssh_auth_user,$ssh_auth_pass,$reconnect=-1) {	//Constructor
-	global $ssh_host, $ssh_port, $ssh_auth_user, $ssh_auth_pass, $keepAlive, $FLAG;					//Copying data to global variables
-	$keepAlive = $reconnect;
-	$FLAG = 0;
-	$this->connect();
-	$this->showConnection();
+public function SSH_Connection($ssh_host,$ssh_port,$ssh_auth_user,$ssh_auth_pass,$reconnect=-1) {   //Constructor
+    global $ssh_host, $ssh_port, $ssh_auth_user, $ssh_auth_pass, $keepAlive, $FLAG;                 //Copying data to global variables
+    $keepAlive = $reconnect;
+    $FLAG = 0;
+    $this->connect();
+    $this->showConnection();
 }
 
-public function connect() {																			//Connects to SSH session
-																									//Returns false on failure
-	global $ssh, $shell;
-	global $ssh_host, $ssh_port, $ssh_auth_user, $ssh_auth_pass;
-	while (!($ssh = ssh2_connect($ssh_host,$ssh_port))) {
-//		echo "Cannot connect to server.\n";
-		if ($GLOBALS['keepAlive'] == -1) {
-			$GLOBALS['FLAG'] = 2;
-			return false;
-		}
-		sleep($GLOBALS['keepAlive']);
-	}
-//	echo "Connected to the server. Authenticating...\n";
+public function connect() {                                                                         //Connects to SSH session
+                                                                                                    //Returns false on failure
+    global $ssh,$scp;
+    global $ssh_host, $ssh_port, $ssh_auth_user, $ssh_auth_pass;
+    while (true) {
+        $ssh = new Net_SSH2($ssh_host,$ssh_port);
+        if ($ssh->bitmap&NET_SSH2_MASK_CONSTRUCTOR) {
+//          user_error("Connected to the ".$ssh_host.":".$ssh_port.". Authenticating...");
+            break;
+        }
 
-	if (!(ssh2_auth_password($ssh,$ssh_auth_user,$ssh_auth_pass))) {
-		$GLOBALS['FLAG'] = 1;
-		echo "Authentication failed. Exiting :(\n";
-		return false;
-	}
-	user_error("Successfully connected to ".$ssh_host."!");
-	return true;
+        if ($GLOBALS['keepAlive'] == -1) {
+            $GLOBALS['FLAG'] = 2;
+            return false;
+        }
+        sleep($GLOBALS['keepAlive']);
+    }
+
+    if (!($ssh->login($ssh_auth_user,$ssh_auth_pass))) {
+        $GLOBALS['FLAG'] = 1;
+//        echo "Authentication failed. Exiting :(\n";
+        return false;
+    }
+    else echo "Authenticated :)\n";
+
+    echo $ssh->exec('pwd');
+    $this->send('config.inc','config.inc',644);
+    return true;
 }
 
-public function showConnection() {																	//Shows ssh information
-																									//Returns false if session disconnected
-	echo "\n";
-	echo "SSH Host: ".$GLOBALS['ssh_host'].":".$GLOBALS['ssh_port']."\n";
-	echo "SSH User: ".$GLOBALS['ssh_auth_user']."\n";
-	echo "Reconnect if dropped every ".$GLOBALS['keepAlive']." seconds.\n";
-	
-	if ($GLOBALS['FLAG']!==0) {
-		echo "Session Disconnected!\n";
-		return false;
-	}
+public function showConnection() {                                                                  //Shows ssh information
+                                                                                                    //Returns false if session disconnected
+    echo "\n";
+    echo "SSH Host: ".$GLOBALS['ssh_host'].":".$GLOBALS['ssh_port']."\n";
+    echo "SSH User: ".$GLOBALS['ssh_auth_user']."\n";
+    echo "Reconnect if dropped every ".$GLOBALS['keepAlive']." seconds.\n";
 
-	if (!($this->execute("lastlog | grep '".$GLOBALS['ssh_auth_user']."'", $details))) {
-		if ($GLOBALS['keepAlive']!==-1) {
-			if ($this->connect()) {return $this->showConnection();}
-		}
-		echo "Session Disconnected!\n";
-		return false;
-	}
-	echo 'Session Details: '.$details."\n";
-	return true;
+    if ($GLOBALS['FLAG']!==0) {
+        echo "Session Disconnected!\n";
+        return false;
+    }
+
+    if (!($this->execute("lastlog | grep '".$GLOBALS['ssh_auth_user']."'", $details))) {
+        if ($GLOBALS['keepAlive']!==-1) {
+            if ($this->connect()) {return $this->showConnection();}
+        }
+        echo "Session Disconnected!\n";
+        return false;
+    }
+    echo 'Session Details: '.$details."\n";
+    return true;
 }
 
-public function execute($command, &$reply = null) {													//Executes command on ssh_host
+public function execute($command , &$reply = null) {												//Executes command on ssh_host
 																									//Returns false on failure
 	global $ssh, $FLAG;
 	if ($FLAG !== 0) return false;
 	if (!isset($ssh)) return false;
 
-	$stream = ssh2_exec($ssh, $command.'; Argh=$?; echo "@Arr!="; echo $Argh');
-	$stderr = ssh2_fetch_stream($stream, SSH2_STREAM_STDERR);
-	if (!($stream)) return false;
-	stream_set_blocking($stream, true);
-	stream_set_blocking($stderr, true);
-	while($buffer = fgets($stream)) {
-		flush();
-		if (strncmp($buffer,"@Arr!=",6)==0) break;
-		$reply .= $buffer;
-	}
-	$stderr = stream_get_contents($stderr);
-	if (!empty($stderr)) {
-		$reply = $reply."STDERR:\n".$stderr;
-		user_error($stderr);
-	}
-	$buffer = fgets($stream);
-	$ERRORLEVEL = strncmp($buffer,'0',1);
-	if ($ERRORLEVEL!=0) return false;
-	return true;
+    $reply = $ssh->exec($command);
+    if($reply===false) return false;
+	else return true;
 }
 
 public function send($src, $dst, $mode) {
 	global $ssh, $FLAG;
 	if ($FLAG !== 0) return false;
-
-	if (!(ssh2_scp_send($ssh, $src, $dst, $mode))) {
-		if ($this->showConnection()) {																//showConnection tries to reconnect
-			ssh2_scp_send($ssh, $src, $dst, $mode);
-		}
-		else return false;
-		return false;
+    
+    $scp = new Net_SCP($ssh);
+	if (!($scp->put($dst,$src,NET_SCP_LOCAL_FILE))) {
+		$this->showConnection();															        //showConnection tries to reconnect
+		return $this->send($src, $dst, $mode);
 	}
-	else return true;
+	return true;
 }
 
 public function __destruct() { 																		//Destructor
 	global $ssh;
 	user_error('Closing SSH Connection with '.$GLOBALS['ssh_host'].':'.$GLOBALS['ssh_port']."\n");
 	$this->execute('exit');
-	$ssh = NULL; 
+	$ssh = NULL;
 }
 
 } 

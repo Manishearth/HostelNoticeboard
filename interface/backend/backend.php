@@ -32,15 +32,15 @@ $dbLink->loadQueue($PiID);
 while($obj=$dbLink->getNextDirective()) {
 	switch ($obj->Type) {
 	case "Copy":
-		$status = $PI->send("$path".$obj->Path,$remotepath.$obj->Path,0644);
+		$status = $PI->send($path.$obj->Path,$remotepath.$obj->Path,0644);
 		echo "Copy\n";
 		break;
 	case "Delete":
-		$status = $PI->execute("rm -f "$remotepath.$obj->Path, $dump);
+		$status = $PI->execute("rm -f ".$remotepath.$obj->Path, $dump);
 		echo "Delete\n";
 		break;
 	case "MkDir":
-		$status = $PI->execute("mkdir "$remotepath.$obj->Path, $dump);
+		$status = $PI->execute("mkdir ".$remotepath.$obj->Path, $dump);
 		if (stripos($dump, "File Exists")!==false) $status=true; 
 		echo "MkDir\n";
 		break;
@@ -49,7 +49,7 @@ while($obj=$dbLink->getNextDirective()) {
 	}
 
 	if ($status) {
-		user_error("Command issued on ".$obj->Date." to ".$obj->Type." ".$obj->Path." to/from Hostel ".$obj->Hostel." succesfully executed.\n");
+		user_error("Command issued on ".$obj->Date." to ".$obj->Type." ".$obj->Path." to/from PiID ".$obj->PiID." succesfully executed.\n");
 		$dbLink->directiveSuccess($obj);
 	}
 }

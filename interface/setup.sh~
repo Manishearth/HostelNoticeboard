@@ -5,8 +5,8 @@ IITB Notice Board Server Side Setup Script
 Author: Kamal Galrani
 Date: Nov, 9, 2013
 
-IMPORTANT: Make sure you have LAMP installed.
-           Notice board server will not work without that.
+IMPORTANT: Make sure you have LAMP installed along with ssh2 php library (libssh2-php).
+           Notice board server will not work without them.
 ########################################################################################"
 
 src="$(dirname ${BASH_SOURCE[0]})"
