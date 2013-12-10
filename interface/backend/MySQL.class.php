@@ -139,8 +139,8 @@ class MySQL
 	function getFileList($path) {
 		$_files = [];
 		$folders = scandir($path);
-		$_files[0] = $folders;
-		foreach ($folders as &$folder) {
+		$_files[0] = array_slice($folders,2);
+		foreach ($_files[0] as &$folder) {
 			if ($folder == "." || $folder == "..") continue;
 			$_files[$folder] = scandir($path.$folder);
 		}
