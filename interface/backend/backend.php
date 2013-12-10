@@ -6,7 +6,8 @@ Author: Kamal Galrani
 Date:	Nov, 8, 2013
 
 Usage 
-backend.php <PiID> <ssh_host> <ssh_port> <ssh_username> <ssh_password>
+backend.php <PiID> 
+//backend.php <PiID> <ssh_host> <ssh_port> <ssh_username> <ssh_password>
 *************************************/
 
 include 'MySQL_backend.class.php';
@@ -16,19 +17,28 @@ include 'config.inc';
 //ini_set("log_errors", 1);
 //ini_set("error_log", backend.php);
 
+
+$dbLink=new MySQL($dbUsername,$dbPassword);
+
 //-------------Initialising Variables--------------//
 $PiID = $argv[1];
 if(!is_numeric($PiID)) user_error("PiID should be a number\n");
+$piDetails=$dbLink->getPiData($PiID)
+$ssh_host = $piDetails["IP"];
+$ssh_port = $piDetails["Port"];
+$ssh_auth_user = $piDetails["Uid"];
+$ssh_auth_pass = $piDetails["Pass"];
+/*
 $ssh_host = $argv[2];
 $ssh_port = $argv[3];
 $ssh_auth_user = $argv[4];
 $ssh_auth_pass = $argv[5];
+*/
 //-------------------Main Code---------------------//
 
 $PI = new SSH_Connection($ssh_host,$ssh_port,$ssh_auth_user,$ssh_auth_pass);
-
-$dbLink=new MySQL($dbUsername,$dbPassword);
 $dbLink->loadQueue($PiID);
+
 while($obj=$dbLink->getNextDirective()) {
 	switch ($obj->Type) {
 	case "Copy":
