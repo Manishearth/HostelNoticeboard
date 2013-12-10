@@ -23,6 +23,12 @@ $dbLink=new MySQL($dbUsername,$dbPassword);
 //-------------Initialising Variables--------------//
 $PiID = $argv[1];
 if(!is_numeric($PiID)) user_error("PiID should be a number\n");
+$runningasync=false;
+if(sizeof($argv)>2&&$argv[2]>1){
+	$runningasync=true;
+}
+
+
 $piDetails=$dbLink->getPiData($PiID)
 $ssh_host = $piDetails["IP"];
 $ssh_port = $piDetails["Port"];
@@ -63,9 +69,14 @@ while($obj=$dbLink->getNextDirective()) {
 		$dbLink->directiveSuccess($obj);
 	}
 }
-
-
-
+if($runningasync){
+	$dbLink->setPiLockStatus($pendingPis[$i],0); //Release Pi
+	$pis=$dblink->getPendingUnlockedPis();
+	if(sizeof($pis)>0){
+		$dbLink->setPiLockStatus($pis[0],2); //Lock Pi
+		exec("php backend.php ".$pis[0]." ".$argv[2]." &");
+	}
+}
 //-------------Cleaning up before exit--------------//
 echo "\n";
 echo "Cleaning up...\n";

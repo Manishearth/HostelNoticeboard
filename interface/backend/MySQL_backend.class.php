@@ -154,7 +154,11 @@ class MySQL
 	}
 	function getPiLockStatus($_PiID){
 		$res=$this->query("Select PendLock from PI where PiID=".$_PiID);
-		return $res->fetch_assoc()[0];
+		return $res->fetch_assoc()["PendLock"];
+	}
+	function getPendingUnlockedPis(){
+		$res=$this->query("SELECT PiID from PI where PendLock=1");
+		return $res->fetch_assoc()["PiID"];
 	}
 }
 ?>
