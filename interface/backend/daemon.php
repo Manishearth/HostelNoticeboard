@@ -8,8 +8,8 @@ $dbLink=new MySQL($dbUsername,$dbPassword);
 $pendingPis=$dbLink->getPendingPis();
 chdir($path);
 chdir('../backend');
-for($i=0;i<sizeof($pendingPis);i++){
+foreach($pendingPis as $pendingPi){
 	
-	exec("php backend.php ".$pendingPis[$i]);
+	exec("php backend.php $pendingPi");
 }
 ?>

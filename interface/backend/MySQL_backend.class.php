@@ -138,7 +138,11 @@ class MySQL
 	//Gets list of Pis with pending requests. If the optional argument is true, it also updates the PI table and sets their PendLock statuses to 1
 	function getPendingPis($setPendLock=false){
 		$res=$this->query("SELECT PiID from queue group by PiID");
-		$pendPis=$res->fetch_array(MYSQLI_NUM)[0];
+		$pendPis=array();
+		//$res->fetch_all(MYSQLI_ASSOC);
+		while($row = $res->fetch_array(MYSQLI_ASSOC)){
+			$pendPis[]=$row["PiID"];
+		}
 		if($setPendLock){
 			foreach($pendPis as $pendPi){
 				$this->query("UPDATE TABLE PI SET PendLock=0"); //Clear all locks
