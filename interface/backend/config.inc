@@ -1,6 +1,8 @@
 <?php
-$remotepath=~/;
-$path='/home/singularity/CloudServices/GoogleDrive/Projects/HostelNoticeboard/interface/root/';
+$remotepath="~/";
+$path="/home/muon/Desktop/Programming/Git/HostelNoticeboard/interface/root/";
 $dbUsername='root';
 $dbPassword='toor';
+$asyncnumber=2;
 ?>
+

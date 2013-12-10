@@ -74,13 +74,13 @@ while($obj=$dbLink->getNextDirective()) {
 
 //If in async mode, spawn backend.php for next available Pi after clearing locks.
 if($runningasync){
-	$dbLink->setPiLockStatus($pendingPis[$i],0); //Release Pi
-	$pis=$dblink->getPendingUnlockedPis();
+	$dbLink->setPiLockStatus($PiID,0); //Release Pi
+	$pis=$dbLink->getPendingUnlockedPis();
 	if(sizeof($pis)>0){
 		chdir($path);
 		chdir('../backend');
 		$dbLink->setPiLockStatus($pis[0],2); //Lock Pi
-		exec("php backend.php ".$pis[0]." ".$argv[2]." &");
+		exec("php backend.php ".$pis[0]." ".$argv[2]." > /dev/null 2>/dev/null &");
 	}
 }
 

@@ -143,10 +143,11 @@ class MySQL
 		while($row = $res->fetch_array(MYSQLI_ASSOC)){
 			$pendPis[]=$row["PiID"];
 		}
+		echo var_dump($pendPis);
 		if($setPendLock){
+			$this->query("UPDATE PI SET PendLock=0"); //Clear all locks
 			foreach($pendPis as $pendPi){
-				$this->query("UPDATE TABLE PI SET PendLock=0"); //Clear all locks
-				$this->query("UPDATE TABLE PI SET PendLock=1 WHERE PiID=$pendPi");
+				$this->query("UPDATE  PI SET PendLock=1 WHERE PiID=$pendPi");
 			}
 		}
 		return $pendPis;
@@ -160,7 +161,7 @@ class MySQL
 	
 	//Sets the lock status for a Pi. 1=pending, 2=locked, 0=free
 	function setPiLockStatus($_PiID,$lockstat){
-		$this->query("UPDATE TABLE PI SET PendLock=".$lockstat." WHERE PiID=".$_PiID);
+		$this->query("UPDATE PI SET PendLock=".$lockstat." WHERE PiID=".$_PiID);
 	}
 	
 	//Gets lock status
