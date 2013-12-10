@@ -30,7 +30,7 @@ echo "Installing in $path ..."
 
 echo "Generating config.inc ..."
 echo "<?php" > "$path/backend/config.inc"
-echo "\$remotepath="~/";" >> "$path/backend/config.inc"
+echo "\$remotepath="'~/'";" >> "$path/backend/config.inc"
 echo "\$path='$path/root/';" >> "$path/backend/config.inc"
 echo "\$dbUsername='$uid';"  >> "$path/backend/config.inc"
 echo "\$dbPassword='$pass';" >> "$path/backend/config.inc"
