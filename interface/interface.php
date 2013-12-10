@@ -31,7 +31,7 @@ else {
   else header("HTTP/1.1 403 Unauthorized");
   exit();
 }
-echo '
+?>
 <!DOCTYPE html>
 <html>
 <head>
@@ -126,7 +126,8 @@ echo '
               <div class="col-lg-3">
                 <select name="task" class="form-control select-picker" id="task" onChange="task_onChange()">
                   <option value="Copy">Upload File</option>
-                  <option value="Delete">Remove File</option>';
+                  <option value="Delete">Remove File</option>
+                  <?
 echo "\n";
 //if($dbLink->isAdmin($user))
 //echo '                  <option value="MkDir">Make Directory</option>';
@@ -140,7 +141,7 @@ if($dbLink->hasPerm($user,ADD_DELETE_PI)) {
                   <option value="DelPI">Delete PI</option>';
 	echo "\n";
 }
-echo '                </select>
+?> </select>
               </div>
             </div>
             <div class="form-group">
@@ -151,34 +152,36 @@ echo '                </select>
                   <option value="Cultural">Cultural</option>
                   <option value="Sports">Sports</option>
                   <option value="Technical">Technical</option>
-                  <option value="Hostel">Hostel</option>';
+                  <option value="Hostel">Hostel</option>
+                  <?
 echo "\n";
 //if($dbLink->isAdmin($user)) {
 //	echo '                  <option id="root" value="Root">Root</option>';
 //	echo "\n";
 //}
-echo '                </select>
+?></select>
               </div>
             </div>
             <div id="div_hostel" class="form-group">  
               <label class="control-label col-lg-2">Hostel No</label>
               <div class="col-lg-3 ">
               <select name="hostel" class="form-control select-picker" id="hostel" onChange="hostel_onChange()">
-                <option value="0">All</option>';
+                <option value="0">All</option>
+                <?
 echo "\n";
 $hostels = $dbLink->getHostels();
 foreach ($hostels as &$hostel) {
 	echo '                <option value="'.$hostel.'">'.$hostel.'</option>';	
 	echo "\n";
 }
-echo '              </select>
+?>   </select>
               </div>
             </div>			
             <div class="form-group" id="div_path">
               <label class="control-label col-lg-2">File/Folder</label>
               <div class="col-lg-3" id="Delete">
                 <select name="Delete" class="form-control select-picker">
-                  <option value="0">Select File</option>';
+                  <option value="0">Select File</option><?
 echo "\n";
 $_files = $dbLink->getFileList($path);
 foreach ($_files[0] as &$folder) {
@@ -188,7 +191,7 @@ foreach ($_files[0] as &$folder) {
 		echo "\n";
 	}
 }
-echo '                </select>
+?> </select>
               </div>
 <!--          <div class="col-lg-3" id="MkDir">
                 <input type="text" name="MkDir" value="" placeholder="" class="form-control">
@@ -214,10 +217,11 @@ echo '                </select>
         
         <thead>
           <tr>
-            <th>Date registered</th> <th>Category</th> <th>Directive</th> <th>Hostel</th> <th>File name</th>';
-echo "\n";
-//PHP
-echo '    </tr>
+            <th>Date registered</th> <th>Category</th> <th>Directive</th> <th>Hostel</th> <th>File name</th>
+            
+            <?/*PHP*/?>
+            
+              </tr>
         </thead>
         <tbody>
          
@@ -226,6 +230,5 @@ echo '    </tr>
     </div>
   </div> 
 </body>
-</html>';
-?>
+</html>
 
