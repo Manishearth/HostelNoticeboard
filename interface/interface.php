@@ -208,7 +208,7 @@ foreach ($_files[0] as &$folder) {
             
             
             
-            <div class="form-group" id="div_username" data-task="task-AddUser task-DelUser" style="display: block;">
+            <div class="form-group" id="div_username" data-task="task-AddUser" style="display: block;">
               <label class="control-label col-lg-2">Username</label></label>
               <div class="col-lg-3">
               <input name="user-username" type="text" class="form-control"/>
@@ -255,13 +255,26 @@ foreach ($_files[0] as &$folder) {
              <div class="form-group" id="div_permpis" data-task="task-AddUser" style="display: block;">
               <label class="control-label col-lg-2">Add/Delete Pis</label></label>
               <div class="col-lg-3">
-              <input name="permission-pi" type="checkbox" class="form-control"/>
+              <input name="user-permission-pi" type="checkbox" class="form-control"/>
               </div>
               
             </div>  
 
+             <div class="form-group" data-task="task-DelUser">  
+              <label class="control-label col-lg-2">Username</label>
+              <div class="col-lg-3 ">
+              <select name="deluser-id" class="form-control select-picker">
+                <?
+echo "\n";
+$users = $dbLink->getUsers();
+foreach ($users as $auser) {
+	echo '                <option value="'.$auser->ID .'">'.$auser->Uid .'</option>';	
+}
+?> 
 
-
+  </select>
+              </div>
+            </div>	 
 
             <div class="form-group" id="div_piip" data-task="task-AddPI" style="display: block;">
               <label class="control-label col-lg-2">IP</label></label>
@@ -300,7 +313,22 @@ foreach ($hostels as &$hostel) {
               </div>
             </div>		            
             
-                                    
+             <div id="div_hostel" class="form-group" data-task="task-DelPI">  
+              <label class="control-label col-lg-2">Pi IP</label>
+              <div class="col-lg-3 ">
+              <select name="delpi-ip" class="form-control select-picker" id="hostel" onChange="hostel_onChange()">
+                <?
+echo "\n";
+$pis = $dbLink->getPis();
+foreach ($pis as $pi) {
+	echo '                <option value="'.$pi->IP.'">'.$pi->IP.' (Hostel '.$pi->Hostel.')</option>';	
+	echo "\n";
+}
+?>   </select>
+              </div>
+            </div>	   
+            
+                                            
             <div class="form-group">
               <div class="col-lg-10 col-lg-offset-2">
                 <button type="submit" class="btn btn-primary" name="submit" onClick="submit_onClick()">Submit</button>

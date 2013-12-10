@@ -77,6 +77,22 @@ class MySQL
 		}
 		return $hostels;
 	}
+	function getPis() {
+		$ips;
+		$result=$this->query("SELECT IP,Hostel FROM PI");
+		while($obj=$result->fetch_Object()) {
+			$ips[]=$obj;
+		}
+		return $ips;
+	}
+	function getUsers() {
+		$users;
+		$result=$this->query("SELECT ID,Uid FROM users");
+		while($obj=$result->fetch_Object()) {
+			$users[]=$obj;
+		}
+		return $users;
+	}
 	function getFileList($path) {
 		$_files = [];
 		$folders = scandir($path);
