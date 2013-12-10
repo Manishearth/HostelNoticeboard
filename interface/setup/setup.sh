@@ -46,5 +46,11 @@ echo "Creating cronjob..."
 
 ##Insert Cronjob for backend##
 
+crontab -l > currentcron
+#echo new cron into cron file
+echo "0 */4 * * *php $path/backend/daemon.php" >> currentcron
+#install new cron file
+crontab currentcron
+rm currentcron
 
 echo "Installation successful if you saw no errors :P"
