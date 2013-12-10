@@ -8,23 +8,36 @@ define('ADD_DELETE_PI',	       		8);
 include 'backend/MySQL_frontend.class.php';
 include 'backend/config.inc';
 
-if ($_FILES["Copy"]["error"] > 0)
-  {
-  echo "Error: " . $_FILES["Copy"]["error"] . "<br>";
-  }
-else
-  {
-  echo "Upload: " . $_FILES["Copy"]["name"] . "<br>";
-  echo "Type: " . $_FILES["Copy"]["type"] . "<br>";
-  echo "Size: " . ($_FILES["Copy"]["size"] / 1024) . " kB<br>";
-  echo "Stored in: " . $_FILES["Copy"]["tmp_name"] . "</br>";
-  }
-//echo "Type: " . $_POST["category"];
-
 $path = "/var/www/root/";
-echo $path.$_POST["category"]."/".$_FILES["Copy"]["name"];
-echo shell_exec("touch root/text.txt");
-print_r(error_get_last());
-if (move_uploaded_file($_FILES["Copy"]["tmp_name"], $path.$_FILES["Copy"]["name"])) echo "done";
-print_r(error_get_last());
+
+$dbLink=new MySQL($dbUsername,$dbPassword);
+
+if ( isset($_COOKIE["user"]) && isset($_COOKIE["auth"]) && $dbLink->getAuth($_COOKIE["user"])==$_COOKIE["auth"] ) {
+  setcookie("user",$_COOKIE["user"],time()+900);
+  setcookie("auth",$_COOKIE["auth"],time()+600);
+}
+else {
+  setcookie("auth", "", time()-3600);
+  header('Location: index.php');
+  exit();
+}
+
+switch ($_POST["task"]) {
+case "Copy":
+	if ($_FILES["Copy"]["error"] > 0) {echo "Error: ".$_FILES["Copy"]["error"]."<br>"; exit();}
+	if (move_uploaded_file($_FILES["Copy"]["tmp_name"], $path.$_POST["category"]."/".$_FILES["Copy"]["name"])) {
+		$dbLink->queueTask($_POST["task"], $_POST["category"]."/".$_FILES["Copy"]["name"], $_COOKIE["user"], $_POST["hostel"]);
+		echo "Uploaded!";
+	}
+	print_r(error_get_last());
+	break;
+case "Delete":
+	$dbLink->queueTask($_POST["task"], $_POST["Delete"], $_COOKIE["user"], $_POST["hostel"] );
+	print_r(error_get_last());
+	shell_exec("rm -f '".$path.$_POST["Delete"]."'");
+	print_r(error_get_last());
+	break;
+default:
+	echo "Invalid command or command not implemented";
+}
 ?>

@@ -121,9 +121,15 @@ class MySQL
 	/**************************************
 	 * Custom methods for common frontend *
 	 **************************************/
-	function uploadFile() {
-	}
-	function removeFile() {
+	function queueTask($task,$path,$user,$hostel) {
+		if ($hostel==0) {
+			$result=$this->query("SELECT PiID FROM PI");
+			while($obj=$result->fetch_Object()) $this->query("INSERT INTO queue(Type,Path,Date,PiID,User) VALUES ('".$task."','".$path."',NOW(),".$obj->PiID.",'".$user."')");
+		}
+		else {
+			$result=$this->query("SELECT PiID FROM PI WHERE Hostel = '".$hostel."'");
+			while($obj=$result->fetch_Object()) $this->query("INSERT INTO queue(Type,Path,Date,PiID,User) VALUES ('".$task."','".$path."',NOW(),".$obj->PiID.",'".$user."')");
+		}
 	}
 	function changePass() {
 	}
