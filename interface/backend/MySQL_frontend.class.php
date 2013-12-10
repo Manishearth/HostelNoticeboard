@@ -57,7 +57,7 @@ class MySQL
 	 **********************************************/
 	function getAuth($Uid) {
 		$result=false;
-		if ($result=$this->query("SELECT * from users where Uid=".$UiD)) {;}
+		if ($result=$this->query("SELECT * from users where Uid='".$Uid."'")) {;}
 		else return false;
 		if ($obj=$result->fetch_Object())	return $obj->Pass;
 		else	return false;

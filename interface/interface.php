@@ -8,19 +8,21 @@ define('ADD_DELETE_PI',	       		8);
 include 'backend/MySQL_frontend.class.php';
 include 'backend/config.inc';
 
-/*
-$users = array(
-    "User1" => "Password1",
-    "User2" => "Password2",
-);
-if ( isset($_COOKIE["user"]) && isset($_COOKIE["auth"]) && md5($users[$_COOKIE["user"]])==$_COOKIE["auth"] ) {
+$dbLink=new MySQL($dbUsername,$dbPassword);
+
+//echo $dbLink->getAuth("kamal1210");
+//exit();
+
+
+if ( isset($_COOKIE["user"]) && isset($_COOKIE["auth"]) && $dbLink->getAuth($_COOKIE["user"])==$_COOKIE["auth"] ) {
   setcookie("user",$_COOKIE["user"],time()+900);
   setcookie("auth",$_COOKIE["auth"],time()+600);
+  $user=$_COOKIE["user"];
 }
-elseif ((isset($_POST["user"]))&&(isset($_POST["pass"]))&&($users[$_POST["user"]]==$_POST["pass"])) {
-  $auth = $_POST["pass"];
+elseif ((isset($_POST["user"]))&&(isset($_POST["pass"]))&&($dbLink->getAuth($_POST["user"])==$_POST["pass"])) {
   setcookie("user",$_POST["user"],time()+900);
-  setcookie("auth",md5($auth),time()+600);
+  setcookie("auth",$_POST["pass"],time()+600);
+  $user=$_POST["user"];
 }
 else {
   setcookie("auth", "", time()-3600);
@@ -30,10 +32,7 @@ else {
   exit();
 }
 
-$user=$_COOKIE["user"];
-*/
-$user="kamal1210";
-$dbLink=new MySQL($dbUsername,$dbPassword);
+echo $user;
 
 echo '
 <!DOCTYPE html>
