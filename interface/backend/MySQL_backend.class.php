@@ -134,5 +134,10 @@ class MySQL
 		}
 		return true;
 	}
+	//daemon
+	function getPendingPis(){
+		$res=$this->query("SELECT PiID from queue group by PiID");
+		return $res->fetch_array(MYSQLI_NUM)[0];
+	}
 }
 ?>
