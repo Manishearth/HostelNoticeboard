@@ -134,5 +134,14 @@ class MySQL
 		}
 		return true;
 	}
+	//daemon
+	function getPendingPis(){
+		$res=$this->query("SELECT PiID from queue group by PiID");
+		return $res->fetch_array(MYSQLI_NUM)[0];
+	}
+	function getPiData($_PiID){
+		$res=$this->query("SELECT IP, Uid, Pass, Port from PI where PiID=".$_PiID);
+		return $res->fetch_assoc();
+	}
 }
 ?>
