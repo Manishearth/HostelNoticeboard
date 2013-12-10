@@ -7,17 +7,14 @@ class MySQL
 	private $dbName='NoticeBoard';
 	private $dbLink;
 	
-	function MySQL($dbUsername, $dbPassword) {
-		global $dbUsername;
-		global $dbPassword;
-		$this->connect();}																//Constructor
+	function MySQL($dbUsername, $dbPassword) {$this->connect($dbUsername, $dbPassword);}															//Constructor
 	function __destruct() {$this->close();}																//Destructor
 
 	/*********************************
 	 * Method to connect to database *
 	 *********************************/
-	private function connect() {	
-		$this->dbLink = new mysqli($this->dbHost, $this->dbUsername, $this->dbPassword, $this->dbName);
+	private function connect($dbUsername, $dbPassword) {	
+		$this->dbLink = new mysqli($this->dbHost, $dbUsername, $dbPassword, $this->dbName);
 		if (mysqli_connect_error()) {
 		user_error("MySQL Error: ".mysqli_connect_errno() . '. ' . mysqli_connect_error());
 		die();
@@ -50,7 +47,6 @@ class MySQL
 //DONOT UNCOMMENT THESE LINES
 //THESE LINES ARE JUST FOR REFERENCE
 //
-//define('READ_FILESYSTEM',			0);
 //define('WRITE_FILESYSTEM',		1);
 //define('DELETE_OTHER_USER_FILES',	2);
 //define('ADD_DELETE_USER',       	3);
@@ -60,12 +56,17 @@ class MySQL
 	 * Custom methods for frontend user interface *
 	 **********************************************/
 	function getAuth($Uid) {
-		if ($obj=($this->query("SELECT * from users where Uid=".$UiD))->fetch_Object())	return $obj->Pass;
+		$result=false;
+		if ($result=$this->query("SELECT * from users where Uid=".$UiD)) {;}
+		else return false;
+		if ($obj=$result->fetch_Object())	return $obj->Pass;
 		else	return false;
 	}
 	function hasPerm($Uid,$_Perm) {
-		$Perm=(($this->query("SELECT * from users where Uid=".$UiD))->fetch_Object())->Permission;
-		if ($Perm & $_Perm > 0) return true;
+		$result=false;
+		if ($result=$this->query("SELECT * from users where Uid='".$Uid."'")) {;}
+		$Perm=$result->fetch_Object()->Permission;
+		if ($Perm & $_Perm) return true;
 		else return false;
 	}
 	function getHostels() {
@@ -76,13 +77,23 @@ class MySQL
 		}
 		return $hostels;
 	}
+	function getFileList($path) {
+		$_files = [];
+		$folders = scandir($path);
+		$_files[0] = $folders;
+		foreach ($folders as &$folder) {
+			if ($folder == "." || $folder == "..") continue;
+			$_files[$folder] = scandir($path.$folder);
+		}
+		return $_files;
+	}
 
 	/**********************************************
 	 * Custom methods for administrative frontend *
 	 **********************************************/
 	function addUser($name, $uid, $pass, $perm) {
-		$_pass=md5($pass);
-
+//		$_pass=md5($pass);
+		$_pass=$pass;
 		$_perm=0x00000000;
 		if ($perm[WRITE_FILESYSTEM] == true) 		$_perm = $_perm|0x00000001;
 		if ($perm[DELETE_OTHER_USER_FILES] == true) $_perm = $_perm|0x00000010;
@@ -96,6 +107,7 @@ class MySQL
 	}
 	function addPi($IP, $Hostel, $Uid, $Pass, $Port) {
 //		$_Pass=md5($Pass);
+		$_Pass=$Pass;
 		return $this->query("INSERT INTO PI(IP, Hostel, Uid, Pass, Port) VALUES ('".$IP."',".$Hostel.",'".$Uid."','".$_Pass."',".$Port.")");
 	}
 	function removePi($IP) {

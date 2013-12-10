@@ -2,12 +2,13 @@
 define('READ_FILESYSTEM',		0);
 define('WRITE_FILESYSTEM',		1);
 define('DELETE_OTHER_USER_FILES',	2);
-define('ADD_DELETE_USER',       	3);
-define('ADD_DELETE_PI',	       		4);
+define('ADD_DELETE_USER',       	4);
+define('ADD_DELETE_PI',	       		8);
 
 include 'backend/MySQL_frontend.class.php';
 include 'backend/config.inc';
 
+/*
 $users = array(
     "User1" => "Password1",
     "User2" => "Password2",
@@ -30,6 +31,8 @@ else {
 }
 
 $user=$_COOKIE["user"];
+*/
+$user="kamal1210";
 $dbLink=new MySQL($dbUsername,$dbPassword);
 
 echo '
@@ -128,14 +131,19 @@ echo '
                 <select name="task" class="form-control select-picker" id="task" onChange="task_onChange()">
                   <option value="Copy">Upload File</option>
                   <option value="Delete">Remove File</option>';
+echo "\n";
 //if($dbLink->isAdmin($user))
 //echo '                  <option value="MkDir">Make Directory</option>';
-if($dbLink->hasPerm($user,ADD_DELETE_USER))
-echo '                  <option value="AddUser">Add User</option>
+if($dbLink->hasPerm($user,ADD_DELETE_USER)) {
+	echo '                  <option value="AddUser">Add User</option>
                   <option value="DelUser">Delete User</option>';
-if($dbLink->hasPerm($user,ADD_DELETE_PI))
-echo '                  <option value="AddPI">Add PI</option>
+	echo "\n";
+}
+if($dbLink->hasPerm($user,ADD_DELETE_PI)) {
+	echo '                  <option value="AddPI">Add PI</option>
                   <option value="DelPI">Delete PI</option>';
+	echo "\n";
+}
 echo '                </select>
               </div>
             </div>
@@ -148,8 +156,11 @@ echo '                </select>
                   <option value="Sports">Sports</option>
                   <option value="Technical">Technical</option>
                   <option value="Hostel">Hostel</option>';
-//if($dbLink->isAdmin($user))
-//echo '                  <option id="root" value="Root">Root</option>';
+echo "\n";
+//if($dbLink->isAdmin($user)) {
+//	echo '                  <option id="root" value="Root">Root</option>';
+//	echo "\n";
+//}
 echo '                </select>
               </div>
             </div>
@@ -158,9 +169,12 @@ echo '                </select>
               <div class="col-lg-3 ">
               <select name="hostel" class="form-control select-picker" id="hostel" onChange="hostel_onChange()">
                 <option value="0">All</option>';
+echo "\n";
 $hostels = $dbLink->getHostels();
-$hostels = array(1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16);
-foreach ($hostels as &$hostel) echo '                <option value="'.$hostel.'">'.$hostel.'</option>';
+foreach ($hostels as &$hostel) {
+	echo '                <option value="'.$hostel.'">'.$hostel.'</option>';	
+	echo "\n";
+}
 echo '              </select>
               </div>
             </div>			
@@ -169,21 +183,15 @@ echo '              </select>
               <div class="col-lg-3" id="Delete">
                 <select name="Delete" class="form-control select-picker">
                   <option value="0">Select File</option>';
-$files = $dbLink->getFileList();
-foreach ($files as &$file) echo '                <option value="'.$files["ID"].'" id="'.$files["TAG"].'">'.$files["NAME"].'</option>';
-echo '            <option value="1" id="Academics">File 1A</option>
-                  <option value="2" id="Academics">File 2A</option>
-                  <option value="3" id="Cultural">File 1C</option>
-                  <option value="4" id="Sports">File 1S</option>
-                  <option value="5" id="Sports">File 2S</option>
-                  <option value="6" id="Technical">File 1T</option>
-                  <option value="7" id="All">File 1H0</option>
-                  <option value="8" id="All">File 1H0</option>
-                  <option value="9" id="1">File 1H1</option>
-                  <option value="10" id="2">File 1H2</option>
-                  <option value="11" id="6">File 1H6</option>
-                  <option value="12" id="6">File 2H6</option>
-                  <option value="13" id="6">File 3H6</option>';
+echo "\n";
+$_files = $dbLink->getFileList($path);
+foreach ($_files[0] as &$folder) {
+	foreach ($_files[$folder] as &$file) {
+		if ($file == "." || $file == "..") continue;
+		echo '                  <option value="'.$folder."/".$file.'" id="'.$folder.'">'.$file.'</option>';
+		echo "\n";
+	}
+}
 echo '                </select>
               </div>
               <div class="col-lg-3" id="MkDir">
@@ -210,6 +218,7 @@ echo '                </select>
         <thead>
           <tr>
             <th>Date registered</th> <th>Category</th> <th>Directive</th> <th>Hostel</th> <th>File name</th>';
+echo "\n";
 //PHP
 echo '    </tr>
         </thead>
