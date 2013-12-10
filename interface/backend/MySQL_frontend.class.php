@@ -79,7 +79,7 @@ class MySQL
 	}
 	function getPis() {
 		$ips;
-		$result=$this->query("SELECT IP,Hostel FROM PI");
+		$result=$this->query("SELECT PiID,IP,Hostel FROM PI");
 		while($obj=$result->fetch_Object()) {
 			$ips[]=$obj;
 		}
@@ -92,16 +92,6 @@ class MySQL
 			$users[]=$obj;
 		}
 		return $users;
-	}
-	function getFileList($path) {
-		$_files = [];
-		$folders = scandir($path);
-		$_files[0] = $folders;
-		foreach ($folders as &$folder) {
-			if ($folder == "." || $folder == "..") continue;
-			$_files[$folder] = scandir($path.$folder);
-		}
-		return $_files;
 	}
 
 	/**********************************************
@@ -119,7 +109,8 @@ class MySQL
 		return $this->query("INSERT INTO users(Name,Uid,Pass,Permission) VALUES ('".$name."','".$uid."','".$_pass."',".$_perm.")");
 	}
 	function removeUser($uid) {
-		return $this->query("DELETE FROM users WHERE Uid = '".$uid."'");
+		$this->query("DELETE FROM users WHERE Uid = '".$uid."'");
+		print_r(error_get_last());		
 	}
 	function addPi($IP, $Hostel, $Uid, $Pass, $Port) {
 //		$_Pass=md5($Pass);
@@ -127,7 +118,8 @@ class MySQL
 		return $this->query("INSERT INTO PI(IP, Hostel, Uid, Pass, Port) VALUES ('".$IP."',".$Hostel.",'".$Uid."','".$_Pass."',".$Port.")");
 	}
 	function removePi($IP) {
-		return $this->query("DELETE FROM PI WHERE IP = '".$IP."'");
+		$this->query("DELETE FROM PI WHERE PiID = ".$IP);
+		$this->query("DELETE FROM queue WHERE PiID = ".$IP);
 	}
 	function addDirectory() {
 	}
@@ -143,6 +135,7 @@ class MySQL
 		}
 		return $queue;		
 	}
+
 	/**************************************
 	 * Custom methods for common frontend *
 	 **************************************/
@@ -157,6 +150,75 @@ class MySQL
 		}
 	}
 	function changePass() {
+	}
+	/*********************************************
+	 * Custom methods for administrative backend *
+	 *********************************************/
+	private $_result_a;
+	function loadPiTable() {
+		$this->_result_a=$this->query("SELECT * from PI");
+	}
+	function getNextPi() {
+		return $this->_result_a->fetch_Object();
+	}	
+
+	/****************************************
+	 * Custom methods for execution backend *
+	 ****************************************/
+	private $_result_e;
+	function loadQueue($_PiID) {
+		$this->_result_e=$this->query("SELECT * from queue where PiID=".$_PiID);
+	}
+	function getNextDirective() {
+		return $this->_result_e->fetch_Object();
+	}
+	function directiveSuccess($_object) {
+		$this->query("DELETE FROM queue where Date = '".$_object->Date."'");
+		if (mysqli_error($this->dbLink)){
+			user_error("MySQL Error: ".mysqli_errno($this->dbLink) . ': ' . mysqli_error($this->dbLink));
+			return false;
+		}
+		return true;
+	}
+	
+	//Gets list of Pis with pending requests. If the optional argument is true, it also updates the PI table and sets their PendLock statuses to 1
+	function getPendingPis($setPendLock=false){
+		$res=$this->query("SELECT PiID from queue group by PiID");
+		$pendPis=array();
+		//$res->fetch_all(MYSQLI_ASSOC);
+		while($row = $res->fetch_array(MYSQLI_ASSOC)){
+			$pendPis[]=$row["PiID"];
+		}
+		if($setPendLock){
+			foreach($pendPis as $pendPi){
+				$this->query("UPDATE TABLE PI SET PendLock=0"); //Clear all locks
+				$this->query("UPDATE TABLE PI SET PendLock=1 WHERE PiID=$pendPi");
+			}
+		}
+		return $pendPis;
+	}
+	
+	//Gets relevant SSH data for a given Pi
+	function getPiData($_PiID){
+		$res=$this->query("SELECT IP, Uid, Pass, Port from PI where PiID=".$_PiID);
+		return $res->fetch_assoc();
+	}
+	
+	//Sets the lock status for a Pi. 1=pending, 2=locked, 0=free
+	function setPiLockStatus($_PiID,$lockstat){
+		$this->query("UPDATE TABLE PI SET PendLock=".$lockstat." WHERE PiID=".$_PiID);
+	}
+	
+	//Gets lock status
+	function getPiLockStatus($_PiID){
+		$res=$this->query("Select PendLock from PI where PiID=".$_PiID);
+		return $res->fetch_assoc()["PendLock"];
+	}
+	
+	//Gets a list of Pis that are pending in the current async daemon run, and not being used ("locked") by any backend.php calls
+	function getPendingUnlockedPis(){
+		$res=$this->query("SELECT PiID from PI where PendLock=1");
+		return $res->fetch_assoc()["PiID"];
 	}
 }
 

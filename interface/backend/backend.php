@@ -10,7 +10,7 @@ backend.php <PiID> [<asyncnumber>]
 //backend.php <PiID> <ssh_host> <ssh_port> <ssh_username> <ssh_password>
 *************************************/
 
-include 'MySQL_backend.class.php';
+include 'MySQL.class.php';
 include 'SSH.class.php';
 include 'config.inc';
 
@@ -74,13 +74,13 @@ while($obj=$dbLink->getNextDirective()) {
 
 //If in async mode, spawn backend.php for next available Pi after clearing locks.
 if($runningasync){
-	$dbLink->setPiLockStatus($PiID,0); //Release Pi
-	$pis=$dbLink->getPendingUnlockedPis();
+	$dbLink->setPiLockStatus($pendingPis[$i],0); //Release Pi
+	$pis=$dblink->getPendingUnlockedPis();
 	if(sizeof($pis)>0){
 		chdir($path);
 		chdir('../backend');
 		$dbLink->setPiLockStatus($pis[0],2); //Lock Pi
-		exec("php backend.php ".$pis[0]." ".$argv[2]." > /dev/null 2>/dev/null &");
+		exec("php backend.php ".$pis[0]." ".$argv[2]." &");
 	}
 }
 

@@ -5,7 +5,7 @@ define('DELETE_OTHER_USER_FILES',	2);
 define('ADD_DELETE_USER',       	4);
 define('ADD_DELETE_PI',	       		8);
 
-include 'backend/MySQL_frontend.class.php';
+include 'backend/MySQL.class.php';
 include 'backend/config.inc';
 
 $path = "/var/www/root/";
@@ -37,7 +37,26 @@ case "Delete":
 	shell_exec("rm -f '".$path.$_POST["Delete"]."'");
 	print_r(error_get_last());
 	break;
+case "AddUser":
+	echo "Command not implemented";
+	break;
+case "DelUser":
+	echo "Removing user with Uid = ".$_POST["deluser-id"];
+	$dbLink->removeUser($_POST["deluser-id"]);
+	print_r(error_get_last());
+	break;
+case "AddPI":
+	echo "Command not implemented";
+	break;
+case "DelPI":
+	echo "Removing Pi with ID = ".$_POST["delpi-id"];
+	$dbLink->removePi($_POST["delpi-id"]);
+	print_r(error_get_last());
+	break;
+case "MkDir":
+	echo "Command not implemented";
+	break;
 default:
-	echo "Invalid command or command not implemented";
+	echo "Invalid command!";
 }
 ?>

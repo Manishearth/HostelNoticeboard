@@ -1,28 +1,24 @@
 <?php
-define('READ_FILESYSTEM',		0);
-define('WRITE_FILESYSTEM',		1);
+define('ADD_FILES',     		1);
 define('DELETE_OTHER_USER_FILES',	2);
 define('ADD_DELETE_USER',       	4);
 define('ADD_DELETE_PI',	       		8);
+define('ADD_DELETE_DIRECTORY',	       	16);
 
-include 'backend/MySQL_frontend.class.php';
+include 'backend/MySQL.class.php';
 include 'backend/config.inc';
 
 $dbLink=new MySQL($dbUsername,$dbPassword);
 
-//echo $dbLink->getAuth("kamal1210");
-//exit();
-
-
-if ( isset($_COOKIE["user"]) && isset($_COOKIE["auth"]) && $dbLink->getAuth($_COOKIE["user"])==$_COOKIE["auth"] ) {
-  setcookie("user",$_COOKIE["user"],time()+900);
-  setcookie("auth",$_COOKIE["auth"],time()+600);
-  $user=$_COOKIE["user"];
-}
-elseif ((isset($_POST["user"]))&&(isset($_POST["pass"]))&&($dbLink->getAuth($_POST["user"])==$_POST["pass"])) {
+if ((isset($_POST["user"]))&&(isset($_POST["pass"]))&&($dbLink->getAuth($_POST["user"])==$_POST["pass"])) {
   setcookie("user",$_POST["user"],time()+900);
   setcookie("auth",$_POST["pass"],time()+600);
   $user=$_POST["user"];
+}
+elseif (isset($_COOKIE["user"]) && isset($_COOKIE["auth"]) && $dbLink->getAuth($_COOKIE["user"])==$_COOKIE["auth"] ) {
+  setcookie("user",$_COOKIE["user"],time()+900);
+  setcookie("auth",$_COOKIE["auth"],time()+600);
+  $user=$_COOKIE["user"];
 }
 else {
   setcookie("auth", "", time()-3600);
@@ -122,153 +118,172 @@ else {
       </ul>
     </div>
     <div class="well" id="postComplaint" style="top:100px;">  
-        <h2 style="text-align:center">IIT-B Notice Board</h2>
-        <hr style="border:1px solid">
-        <form action="action.php" method="post" class="form-horizontal" enctype="multipart/form-data">
-            <div class="form-group">
-              <label class="control-label col-lg-2">Directive</label>
-              <div class="col-lg-3">
-                <select name="task" class="form-control select-picker" id="task" onChange="task_onChange()">
-                  <option value="Copy">Upload File</option>
-                  <option value="Delete">Remove File</option>
-                  <?
-echo "\n";
-//if($dbLink->isAdmin($user))
-//echo '                  <option value="MkDir">Make Directory</option>';
+      <h2 style="text-align:center">IIT-B Notice Board</h2>
+      <hr style="border:1px solid">
+      <form action="action.php" method="post" class="form-horizontal" enctype="multipart/form-data">
+        <div class="form-group">
+          <label class="control-label col-lg-2">Directive</label>
+          <div class="col-lg-3">
+            <select name="task" class="form-control select-picker" id="task" onChange="task_onChange()">
+<?php
+if($dbLink->hasPerm($user,ADD_FILES)) {
+  echo '              <option value="Copy">Upload File</option>';
+  echo "\n";
+  echo '              <option value="Delete">Remove File</option>';
+  echo "\n";
+}
+if($dbLink->hasPerm($user,ADD_DELETE_DIRECTORY)) {
+  echo '              <option value="MkDir">Make Directory</option>';
+  echo "\n";
+  echo '              <option value="RmDir">Remove Directory</option>';
+  echo "\n";
+}
 if($dbLink->hasPerm($user,ADD_DELETE_USER)) {
-	echo '                  <option value="AddUser">Add User</option>
-                  <option value="DelUser">Delete User</option>';
-	echo "\n";
+  echo '               <option value="AddUser">Add User</option>';
+  echo "\n";
+  echo '               <option value="DelUser">Delete User</option>';
+  echo "\n";
 }
 if($dbLink->hasPerm($user,ADD_DELETE_PI)) {
-	echo '                  <option value="AddPI">Add PI</option>
-                  <option value="DelPI">Delete PI</option>';
-	echo "\n";
+  echo '               <option value="AddPI">Add PI</option>';
+  echo "\n";
+  echo '               <option value="DelPI">Delete PI</option>';
+  echo "\n";
 }
-?> </select>
-              </div>
-            </div>
-            <div class="form-group" id="div_parent" data-task="task-Copy task-Delete">
-              <label class="control-label col-lg-2">Parent Folder</label>
-              <div class="col-lg-3">
-              <select name="category" class="form-control select-picker" id="category" onChange="category_onChange()">
-                  <option value="Academics">Academics</option>
-                  <option value="Cultural">Cultural</option>
-                  <option value="Sports">Sports</option>
-                  <option value="Technical">Technical</option>
-                  <option value="Hostel">Hostel</option>
-                  <?
-echo "\n";
-//if($dbLink->isAdmin($user)) {
-//	echo '                  <option id="root" value="Root">Root</option>';
-//	echo "\n";
-//}
-?></select>
-              </div>
-            </div>
-            <div id="div_hostel" class="form-group">  
-              <label class="control-label col-lg-2">Hostel No</label>
-              <div class="col-lg-3 ">
-              <select name="hostel" class="form-control select-picker" id="hostel" onChange="hostel_onChange()">
-                <option value="0">All</option>
-                <?
-echo "\n";
-$hostels = $dbLink->getHostels();
-foreach ($hostels as &$hostel) {
-	echo '                <option value="'.$hostel.'">'.$hostel.'</option>';	
-	echo "\n";
+?> 
+            </select>
+          </div>
+        </div>
+        <div class="form-group" id="div_parent" data-task="task-Copy task-Delete task-MkDir task-RmDir">
+          <label class="control-label col-lg-2">Parent Folder</label>
+          <div class="col-lg-3">
+            <select name="category" class="form-control select-picker" id="category" onChange="category_onChange()">
+<?php
+if($dbLink->hasPerm($user,ADD_DELETE_DIRECTORY)) {
+  echo '              <option value="." data-task="task-MkDir task-RmDir">Root</option>';
+  echo "\n";
 }
-?>   </select>
-              </div>
-            </div>			
-            <div class="form-group" id="div_path" data-task="task-Copy task-Delete">
-              <label class="control-label col-lg-2">File/Folder</label>
-              <div class="col-lg-3" data-task="task-Delete">
-                <select name="Delete" class="form-control select-picker">
-                  <option value="0">Select File</option><?
-echo "\n";
 $_files = $dbLink->getFileList($path);
 foreach ($_files[0] as &$folder) {
+  echo '              <option value="'.$folder.'">'.$folder.'</option>';
+  echo "\n";
+}
+?>
+            </select>
+          </div>
+        </div>
+        <div id="div_hostel" class="form-group" data-task="task-Copy task-Delete">  
+          <label class="control-label col-lg-2">Hostel/Location</label>
+          <div class="col-lg-3 ">
+            <select name="hostel" class="form-control select-picker" id="hostel" onChange="hostel_onChange()">
+              <option value="0">All</option>
+<?php
+$_hostels = $dbLink->getFileList($path."Hostel/");
+foreach ($_hostels[0] as &$hostel) {
+  echo '              <option value="'.$hostel.'">'.$hostel.'</option>';	
+  echo "\n";
+}
+?>
+            </select>
+          </div>
+        </div>			
+        <div class="form-group" id="div_path" data-task="task-Copy task-Delete">
+          <label class="control-label col-lg-2">File/Folder</label>
+          <div class="col-lg-3" data-task="task-Delete">
+            <select name="Delete" class="form-control select-picker">
+              <option value="0">Select File</option>
+<?php
+//$_files = $dbLink->getFileList($path);
+foreach ($_files[0] as &$folder) {
+        if ($folder=='Hostel') continue;
 	foreach ($_files[$folder] as &$file) {
 		if ($file == "." || $file == "..") continue;
 		echo '                  <option value="'.$folder."/".$file.'" id="'.$folder.'">'.$file.'</option>';
 		echo "\n";
 	}
 }
-?> </select>
-              </div>
-<!--          <div class="col-lg-3" data-task="task-MkDir">
-                <input type="text" name="MkDir" value="" placeholder="" class="form-control">
-              </div>
--->
-              <div class="col-lg-6" data-task="task-Copy">
-                <input type="file" name="Copy" style="padding: 8px 1px">
-              </div>
-            </div>
-            
-            
-            
-            <div class="form-group" id="div_username" data-task="task-AddUser" style="display: block;">
-              <label class="control-label col-lg-2">Username</label></label>
-              <div class="col-lg-3">
-              <input name="user-username" type="text" class="form-control"/>
-              </div>
-            </div>
-             <div class="form-group" id="div_password1" data-task="task-AddUser" style="display: block;">
-              <label class="control-label col-lg-2">Password</label></label>
-              <div class="col-lg-3">
-              <input name="user-password1" type="password" class="form-control"/>
-              </div>
-              
-            </div>
-              <div class="form-group" id="div_password2" data-task="task-AddUser" style="display: block;">
-              <label class="control-label col-lg-2">Password again</label></label>
-              <div class="col-lg-3">
-              <input name="user-password2" type="password" class="form-control"/>
-              </div>
-              
-            </div>           
+//$_hostels = $dbLink->getFileList($path."Hostel/");
+foreach ($_hostels[0] as &$folder) {
+	foreach ($_hostels[$folder] as &$file) {
+		if ($file == "." || $file == "..") continue;
+		echo '                  <option value="Hostel/'.$folder."/".$file.'" id="'.$folder.'">'.$file.'</option>';
+		echo "\n";
+	}
+}
+?>
+            </select>
+          </div>
+          <div class="col-lg-3" data-task="task-MkDir">
+            <input type="text" name="MkDir" value="" placeholder="" class="form-control">
+          </div>
+          <div class="col-lg-6" data-task="task-Copy">
+            <input type="file" name="Copy" style="padding: 8px 1px">
+          </div>
+        </div>
+        
+        <div class="form-group" id="div_username" data-task="task-AddUser" style="display: block;">
+          <label class="control-label col-lg-2">Username</label></label>
+          <div class="col-lg-3">
+            <input name="user-username" type="text" class="form-control"/>
+          </div>
+        </div>
+        <div class="form-group" id="div_password1" data-task="task-AddUser" style="display: block;">
+          <label class="control-label col-lg-2">Password</label></label>
+          <div class="col-lg-3">
+            <input name="user-password1" type="password" class="form-control"/>
+          </div>
+        </div>
+        <div class="form-group" id="div_password2" data-task="task-AddUser" style="display: block;">
+          <label class="control-label col-lg-2">Password again</label></label>
+          <div class="col-lg-3">
+            <input name="user-password2" type="password" class="form-control"/>
+          </div>
+        </div>           
 
-             <div class="form-group" id="div_files" data-task="task-AddUser" style="display: block;">
-              <label class="control-label col-lg-2">Upload files</label></label>
-              <div class="col-lg-3">
-              <input name="user-permission-upload" type="checkbox" class="form-control"/>
-              </div>
-              
-            </div>  
+        <div class="form-group" id="div_files" data-task="task-AddUser" style="display: block;">
+          <label class="control-label col-lg-2">Upload files</label></label>
+          <div class="col-lg-3">
+            <input name="user-permission-upload" type="checkbox" class="form-control"/>
+          </div>
+        </div>  
             
-             <div class="form-group" id="div_deletefiles" data-task="task-AddUser" style="display: block;">
-              <label class="control-label col-lg-2">Delete all files</label></label>
-              <div class="col-lg-3">
-              <input name="user-permission-delete" type="checkbox" class="form-control"/>
-              </div>
-              
-            </div>  
+        <div class="form-group" id="div_deletefiles" data-task="task-AddUser" style="display: block;">
+          <label class="control-label col-lg-2">Delete all files</label></label>
+          <div class="col-lg-3">
+            <input name="user-permission-delete" type="checkbox" class="form-control"/>
+          </div>
+        </div>  
             
-             <div class="form-group" id="div_permusers" data-task="task-AddUser" style="display: block;">
-              <label class="control-label col-lg-2">Add/Delete users</label></label>
-              <div class="col-lg-3">
-              <input name="user-permission-users" type="checkbox" class="form-control"/>
-              </div>
-              
-            </div>  
-             <div class="form-group" id="div_permpis" data-task="task-AddUser" style="display: block;">
-              <label class="control-label col-lg-2">Add/Delete Pis</label></label>
-              <div class="col-lg-3">
-              <input name="user-permission-pi" type="checkbox" class="form-control"/>
-              </div>
-              
-            </div>  
+        <div class="form-group" id="div_permusers" data-task="task-AddUser" style="display: block;">
+          <label class="control-label col-lg-2">Add/Delete users</label></label>
+          <div class="col-lg-3">
+            <input name="user-permission-users" type="checkbox" class="form-control"/>
+          </div>
+        </div>  
+        
+        <div class="form-group" id="div_permpis" data-task="task-AddUser" style="display: block;">
+          <label class="control-label col-lg-2">Add/Delete Pis</label></label>
+          <div class="col-lg-3">
+            <input name="user-permission-pi" type="checkbox" class="form-control"/>
+          </div>
+        </div>
 
-             <div class="form-group" data-task="task-DelUser">  
-              <label class="control-label col-lg-2">Username</label>
-              <div class="col-lg-3 ">
-              <select name="deluser-id" class="form-control select-picker">
-                <?
-echo "\n";
+        <div class="form-group" id="div_permpdir" data-task="task-AddUser" style="display: block;">
+          <label class="control-label col-lg-2">Add/Delete Directories</label></label>
+          <div class="col-lg-3">
+            <input name="user-permission-dir" type="checkbox" class="form-control"/>
+          </div>
+        </div>  
+
+        <div class="form-group" data-task="task-DelUser">  
+          <label class="control-label col-lg-2">Username</label>
+          <div class="col-lg-3 ">
+            <select name="deluser-id" class="form-control select-picker">
+<?php
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 $users = $dbLink->getUsers();
 foreach ($users as $auser) {
-	echo '                <option value="'.$auser->ID .'">'.$auser->Uid .'</option>';	
+	echo '                <option value="'.$auser->Uid .'">'.$auser->Uid .'</option>';	
 }
 ?> 
 
@@ -280,14 +295,14 @@ foreach ($users as $auser) {
               <label class="control-label col-lg-2">IP</label></label>
               <div class="col-lg-3">
               <div class="input-group"><input name="pi-ip" type="text" class="form-control" value="10."/>
-              <span class="input-group-btn"><input type=text class="form-control" size=2 value=22 name="pi-port"></span>
+              <span class="input-group-btn"><input type=text class="form-control" size=2 value=22 name="pi-port" style="min-width:60px;"></span>
               </div>
               </div>
             </div>
              <div class="form-group" id="div_piuser" data-task="task-AddPI" style="display: block;">
               <label class="control-label col-lg-2">Username</label></label>
               <div class="col-lg-3">
-              <input name="pi-pass" type="text" class="form-control"/>
+              <input name="pi-uid" type="text" class="form-control"/>
               </div>
             </div>                 
              <div class="form-group" id="div_pipass" data-task="task-AddPI" style="display: block;">
@@ -316,12 +331,12 @@ foreach ($hostels as &$hostel) {
              <div id="div_hostel" class="form-group" data-task="task-DelPI">  
               <label class="control-label col-lg-2">Pi IP</label>
               <div class="col-lg-3 ">
-              <select name="delpi-ip" class="form-control select-picker" id="hostel" onChange="hostel_onChange()">
+              <select name="delpi-id" class="form-control select-picker" id="hostel" onChange="hostel_onChange()">
                 <?
 echo "\n";
 $pis = $dbLink->getPis();
 foreach ($pis as $pi) {
-	echo '                <option value="'.$pi->IP.'">'.$pi->IP.' (Hostel '.$pi->Hostel.')</option>';	
+	echo '                <option value="'.$pi->PiID.'">'.$pi->IP.' (Hostel '.$pi->Hostel.')</option>';	
 	echo "\n";
 }
 ?>   </select>
