@@ -39,8 +39,8 @@ echo "Generating config.inc ..."
 
 cat >$path/backend/config.inc << EOF
 <?php
-\$remotepath=~/;
-\$path=$path/root/;
+\$remotepath='~/';
+\$path='$path/root/';
 \$dbUsername='root';
 \$dbPassword='toor';
 \$asyncnumber=1
