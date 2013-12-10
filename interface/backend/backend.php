@@ -9,7 +9,7 @@ Usage
 backend.php <PiID> <ssh_host> <ssh_port> <ssh_username> <ssh_password>
 *************************************/
 
-include 'MySQL.class.php';
+include 'MySQL_backend.class.php';
 include 'SSH.class.php';
 include 'config.inc';
 
@@ -27,7 +27,7 @@ $ssh_auth_pass = $argv[5];
 
 $PI = new SSH_Connection($ssh_host,$ssh_port,$ssh_auth_user,$ssh_auth_pass,0);
 
-$dbLink=new MySQL();
+$dbLink=new MySQL($dbUsername,$dbPassword);
 $dbLink->loadQueue($PiID);
 while($obj=$dbLink->getNextDirective()) {
 	switch ($obj->Type) {

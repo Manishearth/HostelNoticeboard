@@ -1,6 +1,6 @@
 <?php
-define('READ_FILESYSTEM',			0);
-define('WRITE_FILESYSTEM',			1);
+define('READ_FILESYSTEM',		0);
+define('WRITE_FILESYSTEM',		1);
 define('DELETE_OTHER_USER_FILES',	2);
 define('ADD_DELETE_USER',       	3);
 define('ADD_DELETE_PI',	       		4);
@@ -16,17 +16,6 @@ if ( isset($_COOKIE["user"]) && isset($_COOKIE["auth"]) && md5($users[$_COOKIE["
   setcookie("auth",$_COOKIE["auth"],time()+600);
 }
 elseif ((isset($_POST["user"]))&&(isset($_POST["pass"]))&&($users[$_POST["user"]]==$_POST["pass"])) {
-  /*
-  include 'config.inc';
-
-  $dbLink = new mysqli($dbHost, $dbUsername, $dbPassword, $dbName);
-  if (mysqli_connect_error()) {
-	  echo "MySQL Error: ".mysqli_connect_errno() . ' .' . mysqli_connect_error();
-	  die();
-  }
-
-  $sql=
-  */
   $auth = $_POST["pass"];
   setcookie("user",$_POST["user"],time()+900);
   setcookie("auth",md5($auth),time()+600);
@@ -38,6 +27,9 @@ else {
   else header("HTTP/1.1 403 Unauthorized");
   exit();
 }
+
+$user=$_COOKIE["user"];
+$dbLink=new MySQL();
 
 echo '
 <!DOCTYPE html>
@@ -132,59 +124,50 @@ echo '
             <div class="form-group">
               <label class="control-label col-lg-2">Directive</label>
               <div class="col-lg-3">
-                <select name="task" class="form-control select-picker" id="task" onChange="task_onChange()">';
-//PHP
-echo '
+                <select name="task" class="form-control select-picker" id="task" onChange="task_onChange()">
                   <option value="Copy">Upload File</option>
-                  <option value="Delete">Remove File</option>
-                  <option value="MkDir">Make Directory</option>
-                </select>
+                  <option value="Delete">Remove File</option>';
+if($dbLink->isAdmin($user))
+echo '                  <option value="MkDir">Make Directory</option>
+                  <option value="AddUser">Add User</option>
+                  <option value="DelUser">Delete User</option>
+                  <option value="AddPI">Add PI</option>
+                  <option value="DelPI">Delete PI</option>';
+echo '                </select>
               </div>
             </div>
             <div class="form-group">
               <label class="control-label col-lg-2">Parent Folder</label>
               <div class="col-lg-3">
-              <select name="category" class="form-control select-picker" id="category" onChange="category_onChange()">';
-//PHP
-echo '            <option value="Academics">Academics</option>
+              <select name="category" class="form-control select-picker" id="category" onChange="category_onChange()">
+                  <option value="Academics">Academics</option>
                   <option value="Cultural">Cultural</option>
                   <option value="Sports">Sports</option>
                   <option value="Technical">Technical</option>
-                  <option value="Hostel">Hostel</option>
-                  <option id="root" value="Root">Root</option>
-                </select>
+                  <option value="Hostel">Hostel</option>';
+if($dbLink->isAdmin($user))
+echo '                  <option id="root" value="Root">Root</option>';
+echo '                </select>
               </div>
             </div>
             <div id="div_hostel" class="form-group">  
-                <label class="control-label col-lg-2">Hostel No</label>
-                <div class="col-lg-3 ">
-                <select name="hostel" class="form-control select-picker" id="hostel" onChange="hostel_onChange()">';
-//PHP
-echo '                <option value="0">All</option>
-                      <option value="1">1</option>
-                      <option value="2">2</option>
-                      <option value="3">3</option>
-                      <option value="4">4</option>
-                      <option value="5">5</option>
-                      <option value="6">6</option>
-                      <option value="7">7</option>
-                      <option value="8">8</option>
-                      <option value="9">9</option>
-                      <option value="10">10</option>
-                      <option value="11">11</option>
-                      <option value="12">12</option>
-                      <option value="13">13</option>
-                      <option value="14">14</option>
-                      <option value="15">15</option>
-                    </select>
-                </div>
+              <label class="control-label col-lg-2">Hostel No</label>
+              <div class="col-lg-3 ">
+              <select name="hostel" class="form-control select-picker" id="hostel" onChange="hostel_onChange()">
+                <option value="0">All</option>';
+$hostels = $dbLink->getHostels();
+$hostels = array(1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16);
+foreach ($hostels as &$hostel) echo '                <option value="'.$hostel.'">'.$hostel.'</option>';
+echo '              </select>
+              </div>
             </div>			
             <div class="form-group" id="div_path">
               <label class="control-label col-lg-2">File/Folder</label>
               <div class="col-lg-3" id="Delete">
                 <select name="Delete" class="form-control select-picker">
                   <option value="0">Select File</option>';
-//PHP
+$files = $dbLink->getFileList();
+foreach ($files as &$file) echo '                <option value="'.$files["ID"].'" id="'.$files["TAG"].'">'.$files["NAME"].'</option>';
 echo '            <option value="1" id="Academics">File 1A</option>
                   <option value="2" id="Academics">File 2A</option>
                   <option value="3" id="Cultural">File 1C</option>
@@ -197,8 +180,8 @@ echo '            <option value="1" id="Academics">File 1A</option>
                   <option value="10" id="2">File 1H2</option>
                   <option value="11" id="6">File 1H6</option>
                   <option value="12" id="6">File 2H6</option>
-                  <option value="13" id="6">File 3H6</option>
-                </select>
+                  <option value="13" id="6">File 3H6</option>';
+echo '                </select>
               </div>
               <div class="col-lg-3" id="MkDir">
                 <input type="text" name="MkDir" value="" placeholder="" class="form-control">
@@ -235,6 +218,5 @@ echo '    </tr>
   </div> 
 </body>
 </html>';
-
 ?>
 
