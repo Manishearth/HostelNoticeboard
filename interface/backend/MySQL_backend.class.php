@@ -136,6 +136,16 @@ class MySQL
 		}
 		return $queue;		
 	}
+	function getFileList($path) {
+		$_files = [];
+		$folders = scandir($path);
+		$_files[0] = $folders;
+		foreach ($folders as &$folder) {
+			if ($folder == "." || $folder == "..") continue;
+			$_files[$folder] = scandir($path.$folder);
+		}
+		return $_files;
+	}
 
 	/**************************************
 	 * Custom methods for common frontend *
