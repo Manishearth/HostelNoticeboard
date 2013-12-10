@@ -133,7 +133,16 @@ class MySQL
 	}
 	function removeDirectory() {
 	}
-
+	function getQueue(){
+		$queue=array();
+		//return $queue;
+		$res=$this->query("Select Q.Date,Q.Path,Q.Type,P.IP,P.Hostel from queue Q left join PI P on Q.PiID=P.PiID");
+		while($obj=$res->fetch_Object()) {
+			$queue[]=$obj;
+			//echo var_dump($obj);
+		}
+		return $queue;		
+	}
 	/**************************************
 	 * Custom methods for common frontend *
 	 **************************************/

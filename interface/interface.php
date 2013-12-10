@@ -345,14 +345,20 @@ foreach ($pis as $pi) {
         
         <thead>
           <tr>
-            <th>Date registered</th> <th>Category</th> <th>Directive</th> <th>Hostel</th> <th>File name</th>
+            <th>Date registered</th> <th>Path</th> <th>Directive</th> <th>Pi IP</th> <th>Hostel/Location</th>
             
-            <?/*PHP*/?>
+            
             
               </tr>
         </thead>
         <tbody>
-         
+         <?
+         $queue=$dbLink->getQueue();
+
+         foreach($queue as $qitem){
+			 echo "<tr><td>".$qitem->Date ."</td><td>".$qitem->Path ."</td><td>".$qitem->Type ."</td><td>".$qitem->IP ."</td><td>".$qitem->Hostel ."</td></tr>";
+		 }
+         ?>
         </tbody>
       </table>
     </div>
