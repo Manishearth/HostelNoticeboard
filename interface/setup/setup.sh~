@@ -36,12 +36,6 @@ echo "\$dbUsername='$uid';"  >> "$path/backend/config.inc"
 echo "\$dbPassword='$pass';" >> "$path/backend/config.inc"
 echo "?>" >> "$path/backend/config.inc"
 
-mkdir "$path/root"
-mkdir "$path/root/Academics"
-mkdir "$path/root/Cultural"
-mkdir "$path/root/Sports"
-mkdir "$path/root/Hostel"
-
 echo "Creating cronjob..."
 
 ##Insert Cronjob for backend##
