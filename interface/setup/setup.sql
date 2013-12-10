@@ -7,7 +7,7 @@ DROP TABLE IF EXISTS PI;
 create table PI ( 
 	PiID int(4) unsigned NOT NULL auto_increment,
 	IP varchar(15) NOT NULL,
-	Hostel int(2) NOT NULL,
+	Hostel varchar(10) NOT NULL,
 	Uid varchar(20) NOT NULL,
 	Pass varchar (32) NOT NULL,
 	Port int(4) NOT NULL,

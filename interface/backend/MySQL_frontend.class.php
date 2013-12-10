@@ -59,21 +59,28 @@ class MySQL
 	/**********************************************
 	 * Custom methods for frontend user interface *
 	 **********************************************/
-	function getAuth(&$perm) {
-//		return $pass
+	function getAuth($Uid) {
+		if ($obj=($this->query("SELECT * from users where Uid=".$UiD))->fetch_Object())	return $obj->Pass;
+		else	return false;
+	}
+	function hasPerm($Uid,$_Perm) {
+		$Perm=(($this->query("SELECT * from users where Uid=".$UiD))->fetch_Object())->Permission;
+		if ($Perm & $_Perm > 0) return true;
+		else return false;
+	}
+	function getHostels() {
+		$hostels;
+		$result=$this->query("SELECT DISTINCT(Hostel) FROM PI");
+		while($obj=$result->fetch_Object()) {
+			$hostels[]=$obj->Hostel;
+		}
+		return $hostels;
 	}
 
 	/**********************************************
 	 * Custom methods for administrative frontend *
 	 **********************************************/
 	function addUser($name, $uid, $pass, $perm) {
-//insert code to check for max length
-//		if (preg_match('/^[a-zA-Z\40]+$/', $name)!==1) {return "Name can include only alphabets and spaces";}
-//		else $_name=$name;
-//		if (preg_match('/^[a-zA-Z0-9]{5,}$/', $uid)!==1) {return "Username must be alphanumeric.";}
-//		else $_uid=$uid;
-//		if ((preg_match('/^[a-zA-Z0-9!@#$%^&_-]{5,}$/', $pass)!==1)||(preg_match('/[!@#$%^&_-]/', $pass)!==1))
-//			{return "Password can only contain alphanumeric characters\n with atleast one of {!, @, #, $, %, ^, &, _, -}.";}
 		$_pass=md5($pass);
 
 		$_perm=0x00000000;
@@ -108,34 +115,13 @@ class MySQL
 	}
 	function changePass() {
 	}
-	/*********************************************
-	 * Custom methods for administrative backend *
-	 *********************************************/
-	private $_result_a;
-	function loadPiTable() {
-		$this->_result_a=$this->query("SELECT * from PI");
-	}
-	function getNextPi() {
-		return $this->_result_a->fetch_Object();
-	}	
-
-	/****************************************
-	 * Custom methods for execution backend *
-	 ****************************************/
-	private $_result_e;
-	function loadQueue($_PiID) {
-		$this->_result_e=$this->query("SELECT * from queue where PiID=".$_PiID);
-	}
-	function getNextDirective() {
-		return $this->_result_e->fetch_Object();
-	}
-	function directiveSuccess($_object) {
-		$this->query("DELETE FROM queue where Date = '".$_object->Date."'");
-		if (mysqli_error($this->dbLink)){
-			user_error("MySQL Error: ".mysqli_errno($this->dbLink) . ': ' . mysqli_error($this->dbLink));
-			return false;
-		}
-		return true;
-	}
 }
+
+//insert code to check for max length
+//		if (preg_match('/^[a-zA-Z\40]+$/', $name)!==1) {return "Name can include only alphabets and spaces";}
+//		else $_name=$name;
+//		if (preg_match('/^[a-zA-Z0-9]{5,}$/', $uid)!==1) {return "Username must be alphanumeric.";}
+//		else $_uid=$uid;
+//		if ((preg_match('/^[a-zA-Z0-9!@#$%^&_-]{5,}$/', $pass)!==1)||(preg_match('/[!@#$%^&_-]/', $pass)!==1))
+//			{return "Password can only contain alphanumeric characters\n with atleast one of {!, @, #, $, %, ^, &, _, -}.";}
 ?>

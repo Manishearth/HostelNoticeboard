@@ -5,7 +5,8 @@ define('DELETE_OTHER_USER_FILES',	2);
 define('ADD_DELETE_USER',       	3);
 define('ADD_DELETE_PI',	       		4);
 
-include 'MySQL.class.php';
+include 'backend/MySQL_frontend.class.php';
+include 'backend/config.inc';
 
 $users = array(
     "User1" => "Password1",
@@ -29,7 +30,7 @@ else {
 }
 
 $user=$_COOKIE["user"];
-$dbLink=new MySQL();
+$dbLink=new MySQL($dbUsername,$dbPassword);
 
 echo '
 <!DOCTYPE html>
@@ -127,11 +128,13 @@ echo '
                 <select name="task" class="form-control select-picker" id="task" onChange="task_onChange()">
                   <option value="Copy">Upload File</option>
                   <option value="Delete">Remove File</option>';
-if($dbLink->isAdmin($user))
-echo '                  <option value="MkDir">Make Directory</option>
-                  <option value="AddUser">Add User</option>
-                  <option value="DelUser">Delete User</option>
-                  <option value="AddPI">Add PI</option>
+//if($dbLink->isAdmin($user))
+//echo '                  <option value="MkDir">Make Directory</option>';
+if($dbLink->hasPerm($user,ADD_DELETE_USER))
+echo '                  <option value="AddUser">Add User</option>
+                  <option value="DelUser">Delete User</option>';
+if($dbLink->hasPerm($user,ADD_DELETE_PI))
+echo '                  <option value="AddPI">Add PI</option>
                   <option value="DelPI">Delete PI</option>';
 echo '                </select>
               </div>
@@ -145,8 +148,8 @@ echo '                </select>
                   <option value="Sports">Sports</option>
                   <option value="Technical">Technical</option>
                   <option value="Hostel">Hostel</option>';
-if($dbLink->isAdmin($user))
-echo '                  <option id="root" value="Root">Root</option>';
+//if($dbLink->isAdmin($user))
+//echo '                  <option id="root" value="Root">Root</option>';
 echo '                </select>
               </div>
             </div>
