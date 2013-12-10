@@ -140,9 +140,9 @@ class MySQL
 		$res=$this->query("SELECT PiID from queue group by PiID");
 		$pendPis=$res->fetch_array(MYSQLI_NUM)[0];
 		if($setPendLock){
-			for($i=0;$i<sizeof($pendPis);i++){
+			foreach($pendPis as $pendPi){
 				$this->query("UPDATE TABLE PI SET PendLock=0"); //Clear all locks
-				$this->query("UPDATE TABLE PI SET PendLock=1 WHERE PiID=".$pendPis[$i]);
+				$this->query("UPDATE TABLE PI SET PendLock=1 WHERE PiID=$pendPi");
 			}
 		}
 		return $pendPis;

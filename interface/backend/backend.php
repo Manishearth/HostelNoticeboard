@@ -30,7 +30,7 @@ if(sizeof($argv)>2&&$argv[2]>1){
 }
 
 
-$piDetails=$dbLink->getPiData($PiID)
+$piDetails=$dbLink->getPiData($PiID);
 $ssh_host = $piDetails["IP"];
 $ssh_port = $piDetails["Port"];
 $ssh_auth_user = $piDetails["Uid"];
