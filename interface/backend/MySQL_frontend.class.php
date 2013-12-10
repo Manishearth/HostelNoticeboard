@@ -49,8 +49,8 @@ class MySQL
 //
 //define('WRITE_FILESYSTEM',		1);
 //define('DELETE_OTHER_USER_FILES',	2);
-//define('ADD_DELETE_USER',       	3);
-//define('ADD_DELETE_PI',	       	4);
+//define('ADD_DELETE_USER',       	4);
+//define('ADD_DELETE_PI',	       	8);
 
 	/**********************************************
 	 * Custom methods for frontend user interface *

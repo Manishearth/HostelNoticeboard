@@ -31,9 +31,6 @@ else {
   else header("HTTP/1.1 403 Unauthorized");
   exit();
 }
-
-echo $user;
-
 echo '
 <!DOCTYPE html>
 <html>
@@ -123,7 +120,7 @@ echo '
     <div class="well" id="postComplaint" style="top:100px;">  
         <h2 style="text-align:center">IIT-B Notice Board</h2>
         <hr style="border:1px solid">
-        <form action="action.php" method="post" class="form-horizontal">
+        <form action="action.php" method="post" class="form-horizontal" enctype="multipart/form-data">
             <div class="form-group">
               <label class="control-label col-lg-2">Directive</label>
               <div class="col-lg-3">
@@ -193,9 +190,10 @@ foreach ($_files[0] as &$folder) {
 }
 echo '                </select>
               </div>
-              <div class="col-lg-3" id="MkDir">
+<!--          <div class="col-lg-3" id="MkDir">
                 <input type="text" name="MkDir" value="" placeholder="" class="form-control">
               </div>
+-->
               <div class="col-lg-6" id="Copy">
                 <input type="file" name="Copy" style="padding: 8px 1px">
               </div>
