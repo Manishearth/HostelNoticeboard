@@ -13,18 +13,19 @@ create table PI (
 	Port int(4) NOT NULL,
 	PendLock int(4) NOT NULL DEFAULT 0,
 	PRIMARY KEY (PiID),
-	UNIQUE KEY IP(IP),
+	UNIQUE KEY IP(IP)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 DROP TABLE IF EXISTS queue;
 
 create table queue ( 
+	ID BIGINT unsigned NOT NULL auto_increment,
 	Type varchar(15) NOT NULL,
 	Path varchar(100) NOT NULL,
 	Date datetime NOT NULL,
 	PiID int(4) NOT NULL,
 	User varchar(20) NOT NULL,
-	PRIMARY KEY (Date)
+	PRIMARY KEY (ID)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 DROP TABLE IF EXISTS users;
