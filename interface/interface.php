@@ -53,12 +53,15 @@ else {
         $("#task").children("option").each(function(){$(("[id^=".concat($(this).get(0).value)).concat("]")).hide();})
       }
       function hideAllFiles() {
+		$('[name=Delete] [value="0"]')[0].selected='selected'
         $("#category").children("option").each(function(){$(("[id^=".concat($(this).text())).concat("]")).hide();})
         $("#hostel").children("option").each(function(){$(("[id^=".concat($(this).text())).concat("]")).hide();})
       }
       function task_onChange() {
           hideFileInputs();
-          $("#".concat($("#task option:selected").get(0).value)).show();
+          var curtask=$("#task option:selected").val();
+          $("[data-task^='task-']").hide()
+          $("[data-task^='task-"+curtask+"'],[data-task$='task-"+curtask+"']").show();
       }
       function category_onChange() {
           hideAllFiles();
@@ -78,6 +81,7 @@ else {
       function submit_onClick() {
         //Confirm Inputs
       }
+
       $(document).ready(function() {
         hideFileInputs();
         hideAllFiles();
@@ -144,7 +148,7 @@ if($dbLink->hasPerm($user,ADD_DELETE_PI)) {
 ?> </select>
               </div>
             </div>
-            <div class="form-group">
+            <div class="form-group" id="div_parent" data-task="task-Copy task-Delete">
               <label class="control-label col-lg-2">Parent Folder</label>
               <div class="col-lg-3">
               <select name="category" class="form-control select-picker" id="category" onChange="category_onChange()">
@@ -177,9 +181,9 @@ foreach ($hostels as &$hostel) {
 ?>   </select>
               </div>
             </div>			
-            <div class="form-group" id="div_path">
+            <div class="form-group" id="div_path" data-task="task-Copy task-Delete">
               <label class="control-label col-lg-2">File/Folder</label>
-              <div class="col-lg-3" id="Delete">
+              <div class="col-lg-3" data-task="task-Delete">
                 <select name="Delete" class="form-control select-picker">
                   <option value="0">Select File</option><?
 echo "\n";
@@ -193,14 +197,110 @@ foreach ($_files[0] as &$folder) {
 }
 ?> </select>
               </div>
-<!--          <div class="col-lg-3" id="MkDir">
+<!--          <div class="col-lg-3" data-task="task-MkDir">
                 <input type="text" name="MkDir" value="" placeholder="" class="form-control">
               </div>
 -->
-              <div class="col-lg-6" id="Copy">
+              <div class="col-lg-6" data-task="task-Copy">
                 <input type="file" name="Copy" style="padding: 8px 1px">
               </div>
             </div>
+            
+            
+            
+            <div class="form-group" id="div_username" data-task="task-AddUser task-DelUser" style="display: block;">
+              <label class="control-label col-lg-2">Username</label></label>
+              <div class="col-lg-3">
+              <input name="user-username" type="text" class="form-control"/>
+              </div>
+            </div>
+             <div class="form-group" id="div_password1" data-task="task-AddUser" style="display: block;">
+              <label class="control-label col-lg-2">Password</label></label>
+              <div class="col-lg-3">
+              <input name="user-password1" type="password" class="form-control"/>
+              </div>
+              
+            </div>
+              <div class="form-group" id="div_password2" data-task="task-AddUser" style="display: block;">
+              <label class="control-label col-lg-2">Password again</label></label>
+              <div class="col-lg-3">
+              <input name="user-password2" type="password" class="form-control"/>
+              </div>
+              
+            </div>           
+
+             <div class="form-group" id="div_files" data-task="task-AddUser" style="display: block;">
+              <label class="control-label col-lg-2">Upload files</label></label>
+              <div class="col-lg-3">
+              <input name="user-permission-upload" type="checkbox" class="form-control"/>
+              </div>
+              
+            </div>  
+            
+             <div class="form-group" id="div_deletefiles" data-task="task-AddUser" style="display: block;">
+              <label class="control-label col-lg-2">Delete all files</label></label>
+              <div class="col-lg-3">
+              <input name="user-permission-delete" type="checkbox" class="form-control"/>
+              </div>
+              
+            </div>  
+            
+             <div class="form-group" id="div_permusers" data-task="task-AddUser" style="display: block;">
+              <label class="control-label col-lg-2">Add/Delete users</label></label>
+              <div class="col-lg-3">
+              <input name="user-permission-users" type="checkbox" class="form-control"/>
+              </div>
+              
+            </div>  
+             <div class="form-group" id="div_permpis" data-task="task-AddUser" style="display: block;">
+              <label class="control-label col-lg-2">Add/Delete Pis</label></label>
+              <div class="col-lg-3">
+              <input name="permission-pi" type="checkbox" class="form-control"/>
+              </div>
+              
+            </div>  
+
+
+
+
+            <div class="form-group" id="div_piip" data-task="task-AddPI" style="display: block;">
+              <label class="control-label col-lg-2">IP</label></label>
+              <div class="col-lg-3">
+              <div class="input-group"><input name="pi-ip" type="text" class="form-control" value="10."/>
+              <span class="input-group-btn"><input type=text class="form-control" size=2 value=22 name="pi-port"></span>
+              </div>
+              </div>
+            </div>
+             <div class="form-group" id="div_piuser" data-task="task-AddPI" style="display: block;">
+              <label class="control-label col-lg-2">Username</label></label>
+              <div class="col-lg-3">
+              <input name="pi-pass" type="text" class="form-control"/>
+              </div>
+            </div>                 
+             <div class="form-group" id="div_pipass" data-task="task-AddPI" style="display: block;">
+              <label class="control-label col-lg-2">Password</label></label>
+              <div class="col-lg-3">
+              <input name="pi-pass" type="password" class="form-control"/>
+              </div>
+            </div>
+                            
+       <div id="div_pihostel" class="form-group" data-task="task-AddPI">  
+              <label class="control-label col-lg-2">Hostel No</label>
+              <div class="col-lg-3 ">
+              <select name="pi-hostel" class="form-control select-picker" id="pi-hostel">
+                <option value="0">None</option>
+                <?
+echo "\n";
+$hostels = $dbLink->getHostels();
+foreach ($hostels as &$hostel) {
+	echo '                <option value="'.$hostel.'">'.$hostel.'</option>';	
+	echo "\n";
+}
+?>   </select>
+              </div>
+            </div>		            
+            
+                                    
             <div class="form-group">
               <div class="col-lg-10 col-lg-offset-2">
                 <button type="submit" class="btn btn-primary" name="submit" onClick="submit_onClick()">Submit</button>
