@@ -25,7 +25,7 @@ $ssh_auth_user = $argv[4];
 $ssh_auth_pass = $argv[5];
 //-------------------Main Code---------------------//
 
-$PI = new SSH_Connection($ssh_host,$ssh_port,$ssh_auth_user,$ssh_auth_pass,0);
+$PI = new SSH_Connection($ssh_host,$ssh_port,$ssh_auth_user,$ssh_auth_pass);
 
 $dbLink=new MySQL($dbUsername,$dbPassword);
 $dbLink->loadQueue($PiID);
