@@ -34,6 +34,7 @@ echo "\$remotepath="'~/'";" >> "$path/backend/config.inc"
 echo "\$path='$path/root/';" >> "$path/backend/config.inc"
 echo "\$dbUsername='$uid';"  >> "$path/backend/config.inc"
 echo "\$dbPassword='$pass';" >> "$path/backend/config.inc"
+echo "\$asyncnumber=1" >> "$path/backend/config.inc"
 echo "?>" >> "$path/backend/config.inc"
 
 mkdir "$path/root"
@@ -42,14 +43,10 @@ mkdir "$path/root/Cultural"
 mkdir "$path/root/Sports"
 mkdir "$path/root/Hostel"
 
+
 echo "Creating cronjob..."
-
-##Insert Cronjob for backend##
-
 crontab -l > currentcron
-#echo new cron into cron file
 echo "0 */4 * * *php $path/backend/daemon.php" >> currentcron
-#install new cron file
 crontab currentcron
 rm currentcron
 

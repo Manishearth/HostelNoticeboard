@@ -11,8 +11,9 @@ create table PI (
 	Uid varchar(20) NOT NULL,
 	Pass varchar (32) NOT NULL,
 	Port int(4) NOT NULL,
+	PendLock int(4) NOT NULL DEFAULT 0,
 	PRIMARY KEY (PiID),
-	UNIQUE KEY IP(IP)
+	UNIQUE KEY IP(IP),
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 DROP TABLE IF EXISTS queue;

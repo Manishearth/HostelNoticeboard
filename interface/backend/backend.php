@@ -6,7 +6,7 @@ Author: Kamal Galrani
 Date:	Nov, 8, 2013
 
 Usage 
-backend.php <PiID> 
+backend.php <PiID> [<asyncnumber>]
 //backend.php <PiID> <ssh_host> <ssh_port> <ssh_username> <ssh_password>
 *************************************/
 

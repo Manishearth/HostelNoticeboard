@@ -135,13 +135,26 @@ class MySQL
 		return true;
 	}
 	//daemon
-	function getPendingPis(){
+	function getPendingPis($setPendLock=false){
 		$res=$this->query("SELECT PiID from queue group by PiID");
-		return $res->fetch_array(MYSQLI_NUM)[0];
+		$pendPis=$res->fetch_array(MYSQLI_NUM)[0];
+		if($setPendLock){
+			for($i=0;$i<sizeof($pendPis);i++){
+				$this->query("UPDATE TABLE PI SET PendLock=1 WHERE PiID=".$pendPis[$i]);
+			}
+		}
+		return $pendPis;
 	}
 	function getPiData($_PiID){
 		$res=$this->query("SELECT IP, Uid, Pass, Port from PI where PiID=".$_PiID);
 		return $res->fetch_assoc();
+	}
+	function setPiLockStatus($_PiID,$lockstat){
+		$this->query("UPDATE TABLE PI SET PendLock=".$lockstat." WHERE PiID=".$_PiID);
+	}
+	function getPiLockStatus($_PiID){
+		$res=$this->query("Select PendLock from PI where PiID=".$_PiID);
+		return $res->fetch_assoc()[0];
 	}
 }
 ?>
