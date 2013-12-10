@@ -29,13 +29,25 @@ path="$(cd "$src/../" && pwd)"
 echo "Installing in $path ..."
 
 echo "Generating config.inc ..."
-echo "<?php" > "$path/backend/config.inc"
-echo "\$remotepath="'~/'";" >> "$path/backend/config.inc"
-echo "\$path='$path/root/';" >> "$path/backend/config.inc"
-echo "\$dbUsername='$uid';"  >> "$path/backend/config.inc"
-echo "\$dbPassword='$pass';" >> "$path/backend/config.inc"
-echo "\$asyncnumber=1" >> "$path/backend/config.inc"
-echo "?>" >> "$path/backend/config.inc"
+#echo "<?php" > "$path/backend/config.inc"
+#echo "\$remotepath="'~/'";" >> "$path/backend/config.inc"
+#echo "\$path='$path/root/';" >> "$path/backend/config.inc"
+#echo "\$dbUsername='$uid';"  >> "$path/backend/config.inc"
+#echo "\$dbPassword='$pass';" >> "$path/backend/config.inc"
+#echo "\$asyncnumber=1" >> "$path/backend/config.inc"
+#echo "?>" >> "$path/backend/config.inc"
+
+cat >$path/backend/config.inc << EOF
+<?php
+\$remotepath=~/;
+\$path=$path/root/;
+\$dbUsername='root';
+\$dbPassword='toor';
+\$asyncnumber=1
+?>
+
+EOF
+
 
 mkdir "$path/root"
 mkdir "$path/root/Academics"

@@ -134,28 +134,38 @@ class MySQL
 		}
 		return true;
 	}
-	//daemon
+	
+	//Gets list of Pis with pending requests. If the optional argument is true, it also updates the PI table and sets their PendLock statuses to 1
 	function getPendingPis($setPendLock=false){
 		$res=$this->query("SELECT PiID from queue group by PiID");
 		$pendPis=$res->fetch_array(MYSQLI_NUM)[0];
 		if($setPendLock){
 			for($i=0;$i<sizeof($pendPis);i++){
+				$this->query("UPDATE TABLE PI SET PendLock=0"); //Clear all locks
 				$this->query("UPDATE TABLE PI SET PendLock=1 WHERE PiID=".$pendPis[$i]);
 			}
 		}
 		return $pendPis;
 	}
+	
+	//Gets relevant SSH data for a given Pi
 	function getPiData($_PiID){
 		$res=$this->query("SELECT IP, Uid, Pass, Port from PI where PiID=".$_PiID);
 		return $res->fetch_assoc();
 	}
+	
+	//Sets the lock status for a Pi. 1=pending, 2=locked, 0=free
 	function setPiLockStatus($_PiID,$lockstat){
 		$this->query("UPDATE TABLE PI SET PendLock=".$lockstat." WHERE PiID=".$_PiID);
 	}
+	
+	//Gets lock status
 	function getPiLockStatus($_PiID){
 		$res=$this->query("Select PendLock from PI where PiID=".$_PiID);
 		return $res->fetch_assoc()["PendLock"];
 	}
+	
+	//Gets a list of Pis that are pending in the current async daemon run, and not being used ("locked") by any backend.php calls
 	function getPendingUnlockedPis(){
 		$res=$this->query("SELECT PiID from PI where PendLock=1");
 		return $res->fetch_assoc()["PiID"];
