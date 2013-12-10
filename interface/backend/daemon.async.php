@@ -3,6 +3,7 @@ include 'MySQL_backend.class.php';
 include 'SSH.class.php';
 include 'config.inc';
 
+//asyncnumber is the number of simultaneous async backend.php connections to keep open. If it is 1, the behavior is default.
 if($asyncnumber<2){
 	chdir($path)
 	exec("php daemon.php");
@@ -16,7 +17,7 @@ chdir('../backend');
 for($i=0;i<sizeof($pendingPis);i++){
 	$dbLink->setPiLockStatus($pendingPis[$i],2); //Lock Pi
 	exec("php backend.php ".$pendingPis[$i]." $asyncnumber &");
-	if($asyncnumber==$i){
+	if($asyncnumber<=$i){
 		break;
 	}
 }
