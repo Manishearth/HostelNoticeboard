@@ -28,7 +28,8 @@ When you run gui.py, it outputs the recommended image size. Please try to make y
                     another for the second directory, and loop through each individually. 
                     If there are more than two directories, it will take whichever one is 
                     specified first in the 'directories' configuration key. With 4 pics at a time, the screen is tiled 2x2, and 
-                    the first four directories get their own space.
+                    the first four directories get their own space. Subsequent directories are grouped with the corresponding 
+                    directory from the first four
                     */
    "refreshcount":{"1":10,"2":10,"4":10}, // For given value of picsatatime, after how many iterations should the list be reloaded?
    "picspeed":2000, //Persist the pic for this long (in ms)
