@@ -1,3 +1,4 @@
+#!/usr/bin/python
 # Hostel Noticeboard App
 # By Manish Goregaokar
 #
@@ -61,7 +62,12 @@ class App:
         self.getpiclist()
         self.tickerrect=self.can.create_rectangle(0,self.imgbbox[1],self.windowd[0],self.windowd[1],fill=self.config['tickerrectcolor'])
         self.can.tag_lower(self.tickerrect)
-        print "Recommended image size: "+str(self.imgbbox[0])+"x"+str(self.imgbbox[1])+" (Screen size: "+str(self.windowd[0])+"x"+str(self.windowd[1])+")"
+        singleimgbox=[self.imgbbox[0],self.imgbbox[1]]
+        if self.config['picsatatime']>=2:
+            singleimgbox[0]=singleimgbox[0]/2-self.config['tickerpad'][0]
+        if self.config['picsatatime']==4:
+            singleimgbox[1]=singleimgbox[1]/2-self.config['tickerpad'][1]
+        print "Recommended image size: "+str(singleimgbox[0])+"x"+str(singleimgbox[1])+" (Screen size: "+str(self.windowd[0])+"x"+str(self.windowd[1])+")"
         self.can.move(self.tickertext,-a[0],self.windowd[1]+a[1]-self.config['tickerpad'][1])
         self.tickerstate=0
         
