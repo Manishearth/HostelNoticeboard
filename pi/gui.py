@@ -172,6 +172,9 @@ class App:
             x=False
             if self.piclist==temp:
                 x=True
+            if len(self.config['directories'])>=4 and self.config['picsatatime']==4:
+                for i3 in range(4,len(self.config['directories'])):
+                    t2[self.config["directories"][i3-4]]+=t2[self.config["directories"][i3]]
             self.piclist2=t2 if t2 !={} else self.piclist2
             self.piclist = temp if temp!=[] else self.piclist
             if t2!={} and not x:
@@ -192,12 +195,21 @@ class App:
                             self.photos[i][j] = ImageTk.PhotoImage(self.photos[i][j])
                 elif self.config['picsatatime']==4:
                     self.photos={}
+                    ctr=0
                     for i in self.config['directories']:
-                        self.photos[i]=[]
+                        i2=i
+                        jd=0
+                        if ctr>=4:
+                            i2=self.config['directories'][ctr-4]
+                            jd=len(self.photos[i2])
+                        else:
+                            self.photos[i2]=[]
+                        ctr+=1
                         for j in range(0,len(t2[i])):
-                            self.photos[i]+=[Image.open(t2[i][j])]
-                            self.photos[i][j].thumbnail((self.imgbbox[0]/2-self.config['tilingpad'][0],self.imgbbox[1]/2-self.config['tilingpad'][1]))
-                            self.photos[i][j] = ImageTk.PhotoImage(self.photos[i][j])
+                            print [i,i2,j,t2[i][j],j+jd]
+                            self.photos[i2]+=[Image.open(t2[i][j])]
+                            self.photos[i2][j+jd].thumbnail((self.imgbbox[0]/2-self.config['tilingpad'][0],self.imgbbox[1]/2-self.config['tilingpad'][1]))
+                            self.photos[i2][j+jd] = ImageTk.PhotoImage(self.photos[i2][j+jd])
             print "Image fetch&parse successful"
         except IOError as e:
             print "I/O error({0}): {1}".format(e.errno, e.strerror)
