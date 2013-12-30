@@ -66,12 +66,6 @@ class MySQL
 	function getAuth($Uid) {
 		
 		$result=false;
-		/*
-		if ($result=$this->query("SELECT * from users where Uid='".$Uid."'")) {;}
-		else return false;
-		if ($obj=$result->fetch_Object())	return $obj->Pass;
-		else	return false;
-		*/
 		if ($result=$this->pquery("SELECT * from users where Uid=:uid",array('uid'=>$Uid))) {;}
 		else return false;
 		if ($obj=$result->fetch())
@@ -129,20 +123,20 @@ class MySQL
 		if ($perm[ADD_DELETE_USER] == true) 		$_perm = $_perm|0x00000100;
 		if ($perm[ADD_DELETE_PI] == true) 			$_perm = $_perm|0x00001000;
 
-		return $this->query("INSERT INTO users(Name,Uid,Pass,Permission) VALUES ('".$name."','".$uid."','".$_pass."',".$_perm.")");
+		return $this->pquery("INSERT INTO users(Name,Uid,Pass,Permission) VALUES (:name,:uid,:pass,:permission)",array('name'=>$name,'uid'=>$uid,'pass'=>$_pass,'permission'=>$_perm));
 	}
 	function removeUser($uid) {
-		$this->query("DELETE FROM users WHERE Uid = '".$uid."'");
-		print_r(error_get_last());		
+		$this->pquery("DELETE FROM users WHERE Uid = :uid",array('uid'=>$uid));
+	
 	}
 	function addPi($IP, $Hostel, $Uid, $Pass, $Port) {
 //		$_Pass=md5($Pass);
 		$_Pass=$Pass;
-		return $this->query("INSERT INTO PI(IP, Hostel, Uid, Pass, Port) VALUES ('".$IP."',".$Hostel.",'".$Uid."','".$_Pass."',".$Port.")");
+		return $this->pquery("INSERT INTO PI(IP, Hostel, Uid, Pass, Port) VALUES (:ip, :hostel, :uid, :pass, :port)",array('ip'=>$IP,'hostel'=>$Hostel,'uid'=>$Uid,'pass'=>$_Pass,'port'=>$Port));
 	}
 	function removePi($IP) {
-		$this->query("DELETE FROM PI WHERE PiID = ".$IP);
-		$this->query("DELETE FROM queue WHERE PiID = ".$IP);
+		$this->pquery("DELETE FROM PI WHERE PiID = :ip",array('ip'=> $IP));
+		$this->pquery("DELETE FROM queue WHERE PiID = :ip",array('ip'=> $IP));
 	}
 	function addDirectory() {
 	}
@@ -151,8 +145,8 @@ class MySQL
 	function getQueue(){
 		$queue=array();
 		//return $queue;
-		$res=$this->query("Select Q.Date,Q.Path,Q.Type,P.IP,P.Hostel from queue Q left join PI P on Q.PiID=P.PiID");
-		while($obj=$res->fetch_Object()) {
+		$res=$this->pquery("Select Q.Date,Q.Path,Q.Type,P.IP,P.Hostel from queue Q left join PI P on Q.PiID=P.PiID",array());
+		while($obj=$res->fetch(PDO::FETCH_OBJ)) {
 			$queue[]=$obj;
 			//echo var_dump($obj);
 		}
@@ -174,13 +168,13 @@ class MySQL
 	 **************************************/
 	function queueTask($task,$path,$user,$hostel) {
 		if ($hostel==0) {
-			$result=$this->query("SELECT PiID FROM PI");
-			while($obj=$result->fetch_Object()) $this->query("INSERT INTO queue(Type,Path,Date,PiID,User) VALUES ('".$task."','".$path."',NOW(),".$obj->PiID.",'".$user."')");
+			$result=$this->pquery("SELECT PiID FROM PI");
+			while($obj=$result->fetch()) $this->pquery("INSERT INTO queue(Type,Path,Date,PiID,User) VALUES (:type,:path,NOW(),:piid ,:user)",array('type'=>$task,'path'=>$path,'piid'=>$obj['PiID'],'user'=>$user));
 		}
 		else {
-			$result=$this->query("SELECT PiID FROM PI WHERE Hostel = '".$hostel."'");
-			while($obj=$result->fetch_Object()) $this->query("INSERT INTO queue(Type,Path,Date,PiID,User) VALUES ('".$task."','".$path."',NOW(),".$obj->PiID.",'".$user."')");
-		}
+			$result=$this->pquery("SELECT PiID FROM PI WHERE Hostel = :hostel",array('hostel',$hostel));
+			while($obj=$result->fetch()) $this->pquery("INSERT INTO queue(Type,Path,Date,PiID,User) VALUES (:type,:path,NOW(),:piid ,:user)",array('type'=>$task,'path'=>$path,'piid'=>$obj['PiID'],'user'=>$user));
+	}
 	}
 	function changePass() {
 	}
@@ -189,10 +183,10 @@ class MySQL
 	 *********************************************/
 	private $_result_a;
 	function loadPiTable() {
-		$this->_result_a=$this->query("SELECT * from PI");
+		$this->_result_a=$this->pquery("SELECT * from PI",array());
 	}
 	function getNextPi() {
-		return $this->_result_a->fetch_Object();
+		return $this->_result_a->fetch(PDO::FETCH_OBJ);
 	}	
 
 	/****************************************
@@ -200,17 +194,17 @@ class MySQL
 	 ****************************************/
 	private $_result_e;
 	function loadQueue($_PiID) {
-		$this->_result_e=$this->query("SELECT * from queue where PiID=".$_PiID);
+		$this->_result_e=$this->pquery("SELECT * from queue where PiID=:piid",array('piid'=>$_PiID));
 	}
 	function getNextDirective() {
-		return $this->_result_e->fetch_Object();
+		return $this->_result_e->fetch(PDO::FETCH_OBJ);
 	}
 	function directiveSuccess($_object) {
-		$this->query("DELETE FROM queue where Date = '".$_object->Date."'");
-		if (mysqli_error($this->dbLink)){
+		$this->pquery("DELETE FROM queue where Date = :date",array('date'=>$_object->Date));
+		/*if (mysqli_error($this->dbLink)){
 			user_error("MySQL Error: ".mysqli_errno($this->dbLink) . ': ' . mysqli_error($this->dbLink));
 			return false;
-		}
+		}*/
 		return true;
 	}
 	
@@ -224,8 +218,8 @@ class MySQL
 		}
 		if($setPendLock){
 			foreach($pendPis as $pendPi){
-				$this->query("UPDATE TABLE PI SET PendLock=0"); //Clear all locks
-				$this->query("UPDATE TABLE PI SET PendLock=1 WHERE PiID=$pendPi");
+				$this->pquery("UPDATE TABLE PI SET PendLock=0",array()); //Clear all locks
+				$this->pquery("UPDATE TABLE PI SET PendLock=1 WHERE PiID=:pp",array('pp'=>$pendPi));
 			}
 		}
 		return $pendPis;
@@ -233,19 +227,19 @@ class MySQL
 	
 	//Gets relevant SSH data for a given Pi
 	function getPiData($_PiID){
-		$res=$this->query("SELECT IP, Uid, Pass, Port from PI where PiID=".$_PiID);
-		return $res->fetch_assoc();
+		$res=$this->pquery("SELECT IP, Uid, Pass, Port from PI where PiID=:piid",array('piid'=>$_PiID));
+		return $res->fetch(PDO::FETCH_ASSOC);
 	}
 	
 	//Sets the lock status for a Pi. 1=pending, 2=locked, 0=free
 	function setPiLockStatus($_PiID,$lockstat){
-		$this->query("UPDATE TABLE PI SET PendLock=".$lockstat." WHERE PiID=".$_PiID);
+		$this->pquery("UPDATE TABLE PI SET PendLock= :ls WHERE PiID=:piid",array('ls'=>$lockstat,'piid'=>$_PiID));
 	}
 	
 	//Gets lock status
 	function getPiLockStatus($_PiID){
-		$res=$this->query("Select PendLock from PI where PiID=".$_PiID);
-		return $res->fetch_assoc()["PendLock"];
+		$res=$this->pquery("Select PendLock from PI where PiID=:piid",array('piid'=>$_PiID));
+		return $res->fetch(PDO::FETCH_ASSOC)["PendLock"];
 	}
 	
 	//Gets a list of Pis that are pending in the current async daemon run, and not being used ("locked") by any backend.php calls
