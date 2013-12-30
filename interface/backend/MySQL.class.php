@@ -74,37 +74,45 @@ class MySQL
 		*/
 		if ($result=$this->pquery("SELECT * from users where Uid=:uid",array('uid'=>$Uid))) {;}
 		else return false;
-		if ($obj=$result->fetch())	return $obj->Pass;
+		if ($obj=$result->fetch())
+		{	return $obj['Pass'];}
 		else	return false;		
 	}
 	function hasPerm($Uid,$_Perm) {
 		$result=false;
-		if ($result=$this->query("SELECT * from users where Uid='".$Uid."'")) {;}
-		$Perm=$result->fetch_Object()->Permission;
+		if ($result=$this->pquery("SELECT * from users where Uid=:uid",array('uid'=>$Uid))) {;}
+		$Perm=$result->fetch()['Permission'];
 		if ($Perm & $_Perm) return true;
 		else return false;
 	}
 	function getHostels() {
 		$hostels;
-		$result=$this->query("SELECT DISTINCT(Hostel) FROM PI");
-		while($obj=$result->fetch_Object()) {
-			$hostels[]=$obj->Hostel;
+		$result=$this->pquery("SELECT DISTINCT(Hostel) FROM PI",array());
+		while($obj=$result->fetch()) {
+			$hostels[]=$obj['Hostel'];
 		}
 		return $hostels;
 	}
 	function getPis() {
 		$ips;
-		$result=$this->query("SELECT PiID,IP,Hostel FROM PI");
-		while($obj=$result->fetch_Object()) {
-			$ips[]=$obj;
+		$result=$this->pquery("SELECT PiID,IP,Hostel FROM PI",array());
+		while($obj=$result->fetch()) {
+			$obj2=new stdClass();
+			$obj2->PiID=$obj['PiID'];
+			$obj2->IP=$obj['IP'];
+			$obj2->Hostel=$obj['Hostel'];
+			$ips[]=$obj2;
 		}
 		return $ips;
 	}
 	function getUsers() {
 		$users;
-		$result=$this->query("SELECT ID,Uid FROM users");
-		while($obj=$result->fetch_Object()) {
-			$users[]=$obj;
+		$result=$this->pquery("SELECT ID,Uid FROM users",array());
+		while($obj=$result->fetch()) {
+			$obj2=new stdClass();
+			$obj2->ID=$obj['ID'];
+			$obj2->Uid=$obj['Uid'];
+			$users[]=$obj2;
 		}
 		return $users;
 	}
