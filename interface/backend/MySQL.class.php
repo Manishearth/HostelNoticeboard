@@ -14,6 +14,7 @@ class MySQL
 	 * Method to connect to database *
 	 *********************************/
 	private function connect($dbUsername, $dbPassword) {	
+		$this->pdb=new PDO("mysql:host=$this->dbHost;dbname=$this->dbName", $dbUsername, $dbPassword);
 		$this->dbLink = new mysqli($this->dbHost, $dbUsername, $dbPassword, $this->dbName);
 		if (mysqli_connect_error()) {
 		user_error("MySQL Error: ".mysqli_connect_errno() . '. ' . mysqli_connect_error());
@@ -41,6 +42,12 @@ class MySQL
 		}
 		return $result;
 	}
+	function  pquery($sql,$arr)
+	{	
+		$stmt = $this->pdb->prepare($sql);
+		$stmt->execute($arr);
+		return $stmt;
+	}
 
 //----------------------------------------------Custom methods for frontend-----------------------------------------------//
 //
@@ -57,11 +64,18 @@ class MySQL
 	 * Custom methods for frontend user interface *
 	 **********************************************/
 	function getAuth($Uid) {
+		
 		$result=false;
+		/*
 		if ($result=$this->query("SELECT * from users where Uid='".$Uid."'")) {;}
 		else return false;
 		if ($obj=$result->fetch_Object())	return $obj->Pass;
 		else	return false;
+		*/
+		if ($result=$this->pquery("SELECT * from users where Uid=:uid",array('uid'=>$Uid))) {;}
+		else return false;
+		if ($obj=$result->fetch())	return $obj->Pass;
+		else	return false;		
 	}
 	function hasPerm($Uid,$_Perm) {
 		$result=false;
