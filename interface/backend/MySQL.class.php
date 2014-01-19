@@ -33,7 +33,7 @@ class MySQL
 	/*****************************
 	 * Method to run SQL queries *
 	 *****************************/
-	function  query($sql)
+	function query($sql)
 	{	
 		$result = $this->dbLink->query($sql);
 		if (mysqli_error($this->dbLink)){
@@ -42,8 +42,8 @@ class MySQL
 		}
 		return $result;
 	}
-	function  pquery($sql,$arr)
-	{	
+	function pquery($sql,$arr)
+	{
 		$stmt = $this->pdb->prepare($sql);
 		$stmt->execute($arr);
 		return $stmt;
@@ -64,13 +64,13 @@ class MySQL
 	 * Custom methods for frontend user interface *
 	 **********************************************/
 	function getAuth($Uid) {
-		
 		$result=false;
 		if ($result=$this->pquery("SELECT * from users where Uid=:uid",array('uid'=>$Uid))) {;}
 		else return false;
 		if ($obj=$result->fetch())
-		{	return $obj['Pass'];}
-		else	return false;		
+			return $obj['Pass'];
+		else
+			return false;		
 	}
 	function hasPerm($Uid,$_Perm) {
 		$result=false;
@@ -168,13 +168,13 @@ class MySQL
 	 **************************************/
 	function queueTask($task,$path,$user,$hostel) {
 		if ($hostel==0) {
-			$result=$this->pquery("SELECT PiID FROM PI");
+			$result=$this->pquery("SELECT PiID FROM PI",array());
 			while($obj=$result->fetch()) $this->pquery("INSERT INTO queue(Type,Path,Date,PiID,User) VALUES (:type,:path,NOW(),:piid ,:user)",array('type'=>$task,'path'=>$path,'piid'=>$obj['PiID'],'user'=>$user));
 		}
 		else {
 			$result=$this->pquery("SELECT PiID FROM PI WHERE Hostel = :hostel",array('hostel',$hostel));
 			while($obj=$result->fetch()) $this->pquery("INSERT INTO queue(Type,Path,Date,PiID,User) VALUES (:type,:path,NOW(),:piid ,:user)",array('type'=>$task,'path'=>$path,'piid'=>$obj['PiID'],'user'=>$user));
-	}
+		}
 	}
 	function changePass() {
 	}
