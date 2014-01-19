@@ -29,7 +29,8 @@ class App:
         'picspeed':2000, #Switch images every x seconds
         'picsatatime':4, # 1,2, or 4
         'tilingpad':[2,2], #horiz,vert
-        'refreshcount':{1:10,2:10,4:10} #After how many iterations ought I refresh? [PAT1,PAT2,PAT3]
+        'refreshcount':{1:10,2:10,4:10}, #After how many iterations ought I refresh? [PAT1,PAT2,PAT3]
+        'mainpad':[[10,10],[10,10]] #Central canvas margins, [[left,right],[top,bottom]]
         }
         try:
             x=open('config.json')
@@ -58,22 +59,22 @@ class App:
 
         self.tickertext=self.can.create_text(self.can.canvasx(0),self.can.canvasy(0),text=self.tickerlist,  fill=self.config['tickerstyle'][0], font=self.config['tickerstyle'][1])
         a=self.can.bbox(self.tickertext)
-        self.imgbbox=[self.windowd[0],self.windowd[1]-self.config['tickerpad'][0]-self.config['tickerpad'][1]-(a[3]-a[1])]
+        self.imgbbox=[self.windowd[0]-self.config['mainpad'][0][0]-self.config['mainpad'][0][1],self.windowd[1]-self.config['tickerpad'][0]-self.config['tickerpad'][1]-(a[3]-a[1])-self.config['mainpad'][1][0]-self.config['mainpad'][1][1]]
         self.getpiclist()
-        self.tickerrect=self.can.create_rectangle(0,self.imgbbox[1],self.windowd[0],self.windowd[1],fill=self.config['tickerrectcolor'])
+        self.tickerrect=self.can.create_rectangle(0,self.imgbbox[1]+self.config['mainpad'][1][0]+self.config['mainpad'][1][1],self.windowd[0],self.windowd[1],fill=self.config['tickerrectcolor'])
         self.can.tag_lower(self.tickerrect)
         singleimgbox=[self.imgbbox[0],self.imgbbox[1]]
         if self.config['picsatatime']>=2:
             singleimgbox[0]=singleimgbox[0]/2-self.config['tickerpad'][0]
         if self.config['picsatatime']==4:
-            singleimgbox[1]=singleimgbox[1]/2-self.config['tickerpad'][1]
+            singleimgbox[1]=singleimgbox[1]/2-self.config['tickerpad'][1]/2
         print "Recommended image size: "+str(singleimgbox[0])+"x"+str(singleimgbox[1])+" (Screen size: "+str(self.windowd[0])+"x"+str(self.windowd[1])+")"
         self.can.move(self.tickertext,-a[0],self.windowd[1]+a[1]-self.config['tickerpad'][1])
         self.tickerstate=0
         
         if self.config['picsatatime']==1:
             self.picindex=[0]
-            self.imgs=[self.can.create_image(self.imgbbox[0]/2,self.imgbbox[1]/2,image=self.photos[0],anchor=CENTER)]
+            self.imgs=[self.can.create_image(self.imgbbox[0]/2+self.config['mainpad'][0][0],self.imgbbox[1]/2 +self.config['mainpad'][1][0],image=self.photos[0],anchor=CENTER)]
         elif self.config['picsatatime']==2:
             self.picindex=[0,0]
 
@@ -85,10 +86,10 @@ class App:
 
             self.imgs=[0,0,0,0]
             
-            self.imgs[0]=self.can.create_image(self.imgbbox[0]/4-self.config['tilingpad'][0],self.imgbbox[1]/4-self.config['tilingpad'][1],image=self.photos[self.config['directories'][0]][self.picindex[0]],anchor=CENTER)
-            self.imgs[1]=self.can.create_image(3*self.imgbbox[0]/4+self.config['tilingpad'][0],self.imgbbox[1]/4-self.config['tilingpad'][1],image=self.photos[self.config['directories'][1]][self.picindex[1]],anchor=CENTER)
-            self.imgs[2]=self.can.create_image(self.imgbbox[0]/4-self.config['tilingpad'][0],3*self.imgbbox[1]/4+self.config['tilingpad'][1],image=self.photos[self.config['directories'][2]][self.picindex[2]],anchor=CENTER)
-            self.imgs[3]=self.can.create_image(3*self.imgbbox[0]/4+self.config['tilingpad'][0],3*self.imgbbox[1]/4+self.config['tilingpad'][1],image=self.photos[self.config['directories'][3]][self.picindex[3]],anchor=CENTER)
+            self.imgs[0]=self.can.create_image(self.imgbbox[0]/4-self.config['tilingpad'][0]/2,self.imgbbox[1]/4-self.config['tilingpad'][1]/2,image=self.photos[self.config['directories'][0]][self.picindex[0]],anchor=CENTER)
+            self.imgs[1]=self.can.create_image(3*self.imgbbox[0]/4+self.config['tilingpad'][0]/2,self.imgbbox[1]/4-self.config['tilingpad'][1]/2,image=self.photos[self.config['directories'][1]][self.picindex[1]],anchor=CENTER)
+            self.imgs[2]=self.can.create_image(self.imgbbox[0]/4-self.config['tilingpad'][0]/2,3*self.imgbbox[1]/4+self.config['tilingpad'][1]/2,image=self.photos[self.config['directories'][2]][self.picindex[2]],anchor=CENTER)
+            self.imgs[3]=self.can.create_image(3*self.imgbbox[0]/4+self.config['tilingpad'][0]/2,3*self.imgbbox[1]/4+self.config['tilingpad'][1]/2,image=self.photos[self.config['directories'][3]][self.picindex[3]],anchor=CENTER)
         master.after(self.config['tickerspeed'][1],self.moveticker)
         master.after(self.config['picspeed'],self.movepic)
         
@@ -127,7 +128,7 @@ class App:
             self.picindex[0]+=1
             if self.picindex[0] >= len(self.piclist):
                 self.picindex=[0]
-            self.imgs[0]=self.can.create_image(self.imgbbox[0]/2,self.imgbbox[1]/2,image=self.photos[self.picindex[0]],anchor=CENTER)
+            self.imgs[0]=self.can.create_image(self.imgbbox[0]/2+self.config['mainpad'][0][0],self.imgbbox[1]/2 +self.config['mainpad'][1][0],image=self.photos[self.picindex[0]],anchor=CENTER)
         elif self.config['picsatatime']==2:
             for i in range(0,2):
                 self.picindex[i]+=1
@@ -141,10 +142,10 @@ class App:
                 if self.picindex[i]>=len(self.piclist2[self.config['directories'][i]]): 
                     self.picindex[i]=0
                     #self.getpiclist()
-            self.imgs[0]=self.can.create_image(self.imgbbox[0]/4-self.config['tilingpad'][0],self.imgbbox[1]/4-self.config['tilingpad'][1],image=self.photos[self.config['directories'][0]][self.picindex[0]],anchor=CENTER)
-            self.imgs[1]=self.can.create_image(3*self.imgbbox[0]/4+self.config['tilingpad'][0],self.imgbbox[1]/4-self.config['tilingpad'][1],image=self.photos[self.config['directories'][1]][self.picindex[1]],anchor=CENTER)
-            self.imgs[2]=self.can.create_image(self.imgbbox[0]/4-self.config['tilingpad'][0],3*self.imgbbox[1]/4+self.config['tilingpad'][1],image=self.photos[self.config['directories'][2]][self.picindex[2]],anchor=CENTER)
-            self.imgs[3]=self.can.create_image(3*self.imgbbox[0]/4+self.config['tilingpad'][0],3*self.imgbbox[1]/4+self.config['tilingpad'][1],image=self.photos[self.config['directories'][3]][self.picindex[3]],anchor=CENTER)
+            self.imgs[0]=self.can.create_image(self.imgbbox[0]/4-self.config['tilingpad'][0]/2,self.imgbbox[1]/4-self.config['tilingpad'][1]/2,image=self.photos[self.config['directories'][0]][self.picindex[0]],anchor=CENTER)
+            self.imgs[1]=self.can.create_image(3*self.imgbbox[0]/4+self.config['tilingpad'][0]/2,self.imgbbox[1]/4-self.config['tilingpad'][1]/2,image=self.photos[self.config['directories'][1]][self.picindex[1]],anchor=CENTER)
+            self.imgs[2]=self.can.create_image(self.imgbbox[0]/4-self.config['tilingpad'][0]/2,3*self.imgbbox[1]/4+self.config['tilingpad'][1]/2,image=self.photos[self.config['directories'][2]][self.picindex[2]],anchor=CENTER)
+            self.imgs[3]=self.can.create_image(3*self.imgbbox[0]/4+self.config['tilingpad'][0]/2,3*self.imgbbox[1]/4+self.config['tilingpad'][1]/2,image=self.photos[self.config['directories'][3]][self.picindex[3]],anchor=CENTER)
         self.rt.after(self.config['picspeed'],self.movepic)
 
 
@@ -206,7 +207,7 @@ class App:
                             self.photos[i2]=[]
                         ctr+=1
                         for j in range(0,len(t2[i])):
-                            print [i,i2,j,t2[i][j],j+jd]
+                            #print [i,i2,j,t2[i][j],j+jd]
                             self.photos[i2]+=[Image.open(t2[i][j])]
                             self.photos[i2][j+jd].thumbnail((self.imgbbox[0]/2-self.config['tilingpad'][0],self.imgbbox[1]/2-self.config['tilingpad'][1]))
                             self.photos[i2][j+jd] = ImageTk.PhotoImage(self.photos[i2][j+jd])
