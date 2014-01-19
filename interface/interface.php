@@ -27,6 +27,7 @@ else {
   else header("HTTP/1.1 403 Unauthorized");
   exit();
 }
+var isAdmin=$dbLink->hasPerm($user,ADD_DELETE_USER)&&$dbLink->hasPerm($user,ADD_DELETE_PI);
 ?>
 <!DOCTYPE html>
 <html>
@@ -362,12 +363,21 @@ foreach ($pis as $pi) {
             <th>Date registered</th> <th>Path</th> <th>Directive</th> <th>Pi IP</th> <th>Hostel/Location</th> <th>Approved</th> 
           </tr>
         </thead>
+        <script>
+        function approveImg(path){
+          $.post('action.php?task=approve',{'path':path})
+        }
+        </script>
         <tbody>
          <?
          $queue=$dbLink->getQueue();
 
          foreach($queue as $qitem)
-		 echo "<tr><td>".$qitem->Date ."</td><td>".$qitem->Path ."</td><td>".$qitem->Type ."</td><td>".$qitem->IP ."</td><td>".$qitem->Hostel."</td><td>".$qitem->Approved."</td></tr>";
+         $appText="Approved"
+         if(!$qitem->Approved){
+           $appText="<button type=button  onclick='approveImg(\"".$qitem->Path."\")'>Approve!</button>"
+         }
+         echo "<tr><td>".$qitem->Date ."</td><td>".$qitem->Path ."</td><td>".$qitem->Type ."</td><td>".$qitem->IP ."</td><td>".$qitem->Hostel."</td><td>".$appText."</td></tr>";
          ?>
         </tbody>
       </table>
