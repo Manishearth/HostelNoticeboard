@@ -175,7 +175,7 @@ class MySQL
 		}
 		else {
 			$result=$this->pquery("SELECT PiID FROM PI WHERE Hostel = :hostel",array('hostel',$hostel));
-			while($obj=$result->fetch()) $this->pquery("INSERT INTO queue(Type,Path,Date,PiID,User,Approved) VALUES (:type,:path,NOW(),:piid ,:user,:approved)",array('type'=>$task,'path'=>$path,'piid'=>$obj['PiID'],'user'=>$user,'approved'=>$approve));
+			while($obj=$result->fetch()) $this->pquery("INSERT INTO queue(Type,Path,Date,PiID,User,Approved) VALUES (:type,:path,NOW(),:piid ,:user,:approve)",array('type'=>$task,'path'=>$path,'piid'=>$obj['PiID'],'user'=>$user,'approved'=>$approve));
 		}
 	}
 	function changePass() {

@@ -26,13 +26,13 @@ switch ($_POST["task"]) {
 case "Copy":
 	if ($_FILES["Copy"]["error"] > 0) {echo "Error: ".$_FILES["Copy"]["error"]."<br>"; exit();}
 	if (move_uploaded_file($_FILES["Copy"]["tmp_name"], $path.$_POST["category"]."/".$_FILES["Copy"]["name"])) {
-		$dbLink->queueTask($_POST["task"], $_POST["category"]."/".$_FILES["Copy"]["name"], $_COOKIE["user"], $_POST["hostel"],0);
+		$dbLink->queueTask($_POST["task"], $_POST["category"]."/".$_FILES["Copy"]["name"], $_COOKIE["user"], $_POST["hostel"]);
 		echo "Uploaded!";
 	}
 	print_r(error_get_last());
 	break;
 case "Delete":
-	$dbLink->queueTask($_POST["task"], $_POST["Delete"], $_COOKIE["user"], $_POST["hostel"],1);
+	$dbLink->queueTask($_POST["task"], $_POST["Delete"], $_COOKIE["user"], $_POST["hostel"] );
 	print_r(error_get_last());
 	shell_exec("rm -f '".$path.$_POST["Delete"]."'");
 	print_r(error_get_last());
