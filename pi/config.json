@@ -14,4 +14,6 @@
    ],
    "tickerpad":[0,2],
    "tickerstyle":["white",["Helvectica","18"]],
-   "tickerrectcolor":"black"}
+   "tickerrectcolor":"black",
+   "mainpad":[[1,1],[5,5]]
+}
