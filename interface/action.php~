@@ -63,8 +63,7 @@ case "MkDir":
 	echo "Command not implemented";
 	break;
 case "Approve":
-	if(!$dbLink->approveFile($_POST["path"])) echo "false";
-	else "true";
+	$dbLink->approveFile($_POST["path"]);
 	break;
 default:
 	echo "Invalid command!";
