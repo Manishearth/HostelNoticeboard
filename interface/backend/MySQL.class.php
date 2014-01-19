@@ -54,7 +54,7 @@ class MySQL
 //DONOT UNCOMMENT THESE LINES
 //THESE LINES ARE JUST FOR REFERENCE
 //
-//define('READ_FILESYSTEM',			0);
+//define('READ_FILESYSTEM',		0);
 //define('WRITE_FILESYSTEM',		1);
 //define('DELETE_OTHER_USER_FILES',	2);
 //define('ADD_DELETE_USER',       	3);
@@ -144,11 +144,9 @@ class MySQL
 	}
 	function getQueue(){
 		$queue=array();
-		//return $queue;
 		$res=$this->pquery("Select Q.Date,Q.Path,Q.Type,P.IP,P.Hostel from queue Q left join PI P on Q.PiID=P.PiID",array());
 		while($obj=$res->fetch(PDO::FETCH_OBJ)) {
 			$queue[]=$obj;
-			//echo var_dump($obj);
 		}
 		return $queue;		
 	}

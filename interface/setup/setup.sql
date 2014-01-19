@@ -25,6 +25,7 @@ create table queue (
 	Date datetime NOT NULL,
 	PiID int(4) NOT NULL,
 	User varchar(20) NOT NULL,
+	Approved boolean default 0,	
 	PRIMARY KEY (ID)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
