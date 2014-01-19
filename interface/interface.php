@@ -27,7 +27,7 @@ else {
   else header("HTTP/1.1 403 Unauthorized");
   exit();
 }
-var isAdmin=$dbLink->hasPerm($user,ADD_DELETE_USER)&&$dbLink->hasPerm($user,ADD_DELETE_PI);
+var $isAdmin=$dbLink->hasPerm($user,ADD_DELETE_USER)&&$dbLink->hasPerm($user,ADD_DELETE_PI);
 ?>
 <!DOCTYPE html>
 <html>
@@ -365,7 +365,7 @@ foreach ($pis as $pi) {
         </thead>
         <script>
         function approveImg(path){
-          $.post('action.php?task=approve',{'path':path})
+          $.post('action.php',{'task':'approve','path':path})
         }
         </script>
         <tbody>
@@ -375,7 +375,11 @@ foreach ($pis as $pi) {
          foreach($queue as $qitem){
          $appText="Approved";
          if(!$qitem->Approved){
+           if($isAdmin){
            $appText="<button type=button  onclick='approveImg(\"".$qitem->Path."\")'>Approve!</button>";
+         }else{
+           $appText="Pending";
+          }
          }
          echo "<tr><td>".$qitem->Date ."</td><td>".$qitem->Path ."</td><td>".$qitem->Type ."</td><td>".$qitem->IP ."</td><td>".$qitem->Hostel."</td><td>".$appText."</td></tr>";
         }
