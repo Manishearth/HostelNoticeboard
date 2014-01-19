@@ -372,12 +372,13 @@ foreach ($pis as $pi) {
          <?
          $queue=$dbLink->getQueue();
 
-         foreach($queue as $qitem)
-         $appText="Approved"
+         foreach($queue as $qitem){
+         $appText="Approved";
          if(!$qitem->Approved){
-           $appText="<button type=button  onclick='approveImg(\"".$qitem->Path."\")'>Approve!</button>"
+           $appText="<button type=button  onclick='approveImg(\"".$qitem->Path."\")'>Approve!</button>";
          }
          echo "<tr><td>".$qitem->Date ."</td><td>".$qitem->Path ."</td><td>".$qitem->Type ."</td><td>".$qitem->IP ."</td><td>".$qitem->Hostel."</td><td>".$appText."</td></tr>";
+        }
          ?>
         </tbody>
       </table>
