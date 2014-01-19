@@ -387,7 +387,7 @@ foreach ($pis as $pi) {
         function approveImg(path){
           $.post('action.php',{'task':'Approve','path':path},function(data){
             if(data!="true"){return;}
-              $('tr[data-path="'+path+'"][data-type=Create]').fadeOut().remove()
+              $('tr[data-path="'+path+'"][data-type=Copy]').fadeOut().remove()
               
             })
             return true;
@@ -398,7 +398,7 @@ foreach ($pis as $pi) {
         function hideSome(){
           $('.approvaltr').each(function(){
             path=$(this).data('path')
-            $('.approvaltr[data-path="'+path+'"][data-type=Create]').hide().first().show()
+            $('.approvaltr[data-path="'+path+'"][data-type=Copy]').hide().first().show()
             $('.approvaltr:not([data-type=Copy])').hide()
         })
         }
