@@ -3,7 +3,7 @@
    "tilingpad":[2,2],
    "delimiter":"         ",
    "canvasbg":"white",
-   "picsatatime":4,
+   "picsatatime":1,
    "refreshcount":{"1":10,"2":10,"4":10},
    "picspeed":2000,
    "directories":[
@@ -15,5 +15,6 @@
    "tickerpad":[0,2],
    "tickerstyle":["white",["Helvectica","18"]],
    "tickerrectcolor":"black",
-   "mainpad":[[1,1],[5,5]]
+   "mainpad":[[1,1],[50,5]],
+   "logoscale":[200,40]
 }
