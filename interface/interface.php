@@ -365,7 +365,20 @@ foreach ($pis as $pi) {
         </thead>
         <script>
         function approveImg(path){
-          $.post('action.php',{'task':'approve','path':path})
+          $.post('action.php',{'task':'Approve','path':path},function(data){
+            if(data!="true"){return;}
+              $('tr[data-path='+path+']').fadeOut().remove()
+              
+            })
+        }
+        function showAll(){
+          $('.approvaltr,approvaltr tc').show()
+        }
+        function hideSome(){
+          $('.approvaltd').each(function(){
+            path=$(this).data('path')
+            $('[data-path="'+path+'"]')hide().first().show()
+        })
         }
         </script>
         <tbody>
@@ -381,7 +394,7 @@ foreach ($pis as $pi) {
            $appText="Pending";
           }
          }
-         echo "<tr><td>".$qitem->Date ."</td><td>".$qitem->Path ."</td><td>".$qitem->Type ."</td><td>".$qitem->IP ."</td><td>".$qitem->Hostel."</td><td>".$appText."</td></tr>";
+         echo "<tr class=approvaltr data-path='".$qitem->Path ."'><td class=approvaltd>".$qitem->Date ."</td><td class=approvaltd>".$qitem->Path ."</td><td class=approvaltd>".$qitem->Type ."</td><td>".$qitem->IP ."</td><td>".$qitem->Hostel."</td><td class=approvaltd>".$appText."</td></tr>";
         }
          ?>
         </tbody>
