@@ -357,31 +357,14 @@ foreach ($pis as $pi) {
     <div class="well" id="viewComplaint">
       <h2 style="text-align:center">IIT-B Notice Board</h2>
       <hr style="border:1px solid">
+ 
       <table cellspacing="3" cellpadding="3">
         <thead>
           <tr>
             <th>Date registered</th> <th>Path</th> <th>Directive</th> <th>Pi IP</th> <th>Hostel/Location</th> <th>Approved</th> 
           </tr>
         </thead>
-        <script>
-        function approveImg(path){
-          $.post('action.php',{'task':'Approve','path':path},function(data){
-            if(data!="true"){return;}
-              $('tr[data-path='+path+']').fadeOut().remove()
-              
-            })
-        }
-        function showAll(){
-          $('.approvaltr,approvaltr tc').show()
-        }
-        function hideSome(){
-          $('.approvaltr').each(function(){
-            path=$(this).data('path')
-            $('.approvaltr[data-path="'+path+'"][data-type=Create]')hide().first().show()
-            $('.approvaltr:not([data-type=Create])')hide()
-        })
-        }
-        </script>
+
         <tbody>
          <?
          $queue=$dbLink->getQueue();
@@ -390,7 +373,7 @@ foreach ($pis as $pi) {
          $appText="Approved";
          if(!$qitem->Approved){
            if($isAdmin){
-           $appText="<button type=button class='btn btn-default' onclick='approveImg(\"".$qitem->Path."\")'>Approve!</button>";
+           $appText="<button type=button class='btn btn-default approvebtn' data-bpath=''".$qitem->Path."'>Approve!</button>";
          }else{
            $appText="Pending";
           }
@@ -400,6 +383,27 @@ foreach ($pis as $pi) {
          ?>
         </tbody>
       </table>
+                   <script>
+        function approveImg(path){
+          $.post('action.php',{'task':'Approve','path':path},function(data){
+            if(data!="true"){return;}
+              $('tr[data-path='+path+']').fadeOut().remove()
+              
+            })
+            return true;
+        }
+        function showAll(){
+          $('.approvaltr,approvaltr tc').show()
+        }
+        function hideSome(){
+          $('.approvaltr').each(function(){
+            path=$(this).data('path')
+            $('.approvaltr[data-path="'+path+'"][data-type=Create]').hide().first().show()
+            $('.approvaltr:not([data-type=Copy])').hide()
+        })
+        }
+        $('.approvebtn').click(function(){approveImg($(this).attr('data-path'))})
+        </script>
     </div>
   </div> 
 </body>
