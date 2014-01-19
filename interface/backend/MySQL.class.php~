@@ -199,7 +199,7 @@ class MySQL
 		return $this->_result_e->fetch(PDO::FETCH_OBJ);
 	}
 	function directiveSuccess($_object) {
-		$this->pquery("DELETE FROM queue where Date = :ID",array('date'=>$_object->ID));
+		$this->pquery("DELETE FROM queue where Date = :date",array('date'=>$_object->Date));
 		/*if (mysqli_error($this->dbLink)){
 			user_error("MySQL Error: ".mysqli_errno($this->dbLink) . ': ' . mysqli_error($this->dbLink));
 			return false;
