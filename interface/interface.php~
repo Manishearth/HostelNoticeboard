@@ -376,7 +376,7 @@ foreach ($pis as $pi) {
          $appText="Approved";
          if(!$qitem->Approved){
            if($isAdmin){
-           $appText="<button type=button class='btn btn-default' onclick='approveImg(\"".$qitem->Path."\")'>Approve!</button>";
+           $appText="<button type=button  onclick='approveImg(\"".$qitem->Path."\")'>Approve!</button>";
          }else{
            $appText="Pending";
           }
