@@ -357,22 +357,17 @@ foreach ($pis as $pi) {
       <h2 style="text-align:center">IIT-B Notice Board</h2>
       <hr style="border:1px solid">
       <table cellspacing="3" cellpadding="3">
-        
         <thead>
           <tr>
-            <th>Date registered</th> <th>Path</th> <th>Directive</th> <th>Pi IP</th> <th>Hostel/Location</th>
-            
-            
-            
-              </tr>
+            <th>Date registered</th> <th>Path</th> <th>Directive</th> <th>Pi IP</th> <th>Hostel/Location</th> <th>Approved</th> 
+          </tr>
         </thead>
         <tbody>
          <?
          $queue=$dbLink->getQueue();
 
-         foreach($queue as $qitem){
-			 echo "<tr><td>".$qitem->Date ."</td><td>".$qitem->Path ."</td><td>".$qitem->Type ."</td><td>".$qitem->IP ."</td><td>".$qitem->Hostel ."</td></tr>";
-		 }
+         foreach($queue as $qitem)
+		 echo "<tr><td>".$qitem->Date ."</td><td>".$qitem->Path ."</td><td>".$qitem->Type ."</td><td>".$qitem->IP ."</td><td>".$qitem->Hostel."</td><td>".$qitem->Approved."</td></tr>";
          ?>
         </tbody>
       </table>

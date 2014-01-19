@@ -38,7 +38,12 @@ case "Delete":
 	print_r(error_get_last());
 	break;
 case "AddUser":
-	echo "Command not implemented";
+	$perm = array(WRITE_FILESYSTEM=>$_POST["user-permission-upload"],
+		DELETE_OTHER_USER_FILES=>$_POST["user-permission-delete"],
+		ADD_DELETE_USER=>$_POST["user-permission-users"],
+		ADD_DELETE_PI=>$_POST["user-permission-pi"]);
+	$dbLink->addUser("",$_POST["user-username"],$_POST["user-password1"], $perm);
+	echo "Added user with Uid = ".$_POST["user-username"];
 	break;
 case "DelUser":
 	echo "Removing user with Uid = ".$_POST["deluser-id"];
@@ -46,6 +51,7 @@ case "DelUser":
 	print_r(error_get_last());
 	break;
 case "AddPI":
+//	$dbLink->addPi($IP, $Hostel, $Uid, $Pass, $Port)
 	echo "Command not implemented";
 	break;
 case "DelPI":
