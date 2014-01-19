@@ -375,9 +375,10 @@ foreach ($pis as $pi) {
           $('.approvaltr,approvaltr tc').show()
         }
         function hideSome(){
-          $('.approvaltd').each(function(){
+          $('.approvaltr').each(function(){
             path=$(this).data('path')
-            $('[data-path="'+path+'"]')hide().first().show()
+            $('.approvaltr[data-path="'+path+'"][data-type=Create]')hide().first().show()
+            $('.approvaltr:not([data-type=Create])')hide()
         })
         }
         </script>
@@ -394,7 +395,7 @@ foreach ($pis as $pi) {
            $appText="Pending";
           }
          }
-         echo "<tr class=approvaltr data-path='".$qitem->Path ."'><td class=approvaltd>".$qitem->Date ."</td><td class=approvaltd>".$qitem->Path ."</td><td class=approvaltd>".$qitem->Type ."</td><td>".$qitem->IP ."</td><td>".$qitem->Hostel."</td><td class=approvaltd>".$appText."</td></tr>";
+         echo "<tr class=approvaltr data-type='".$qitem->Type."' data-path='".$qitem->Path ."'><td class=approvaltd>".$qitem->Date ."</td><td class=approvaltd>".$qitem->Path ."</td><td class=approvaltd>".$qitem->Type ."</td><td>".$qitem->IP ."</td><td>".$qitem->Hostel."</td><td class=approvaltd>".$appText."</td></tr>";
         }
          ?>
         </tbody>
