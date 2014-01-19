@@ -126,8 +126,11 @@ class MySQL
 		return $this->pquery("INSERT INTO users(Name,Uid,Pass,Permission) VALUES (:name,:uid,:pass,:permission)",array('name'=>$name,'uid'=>$uid,'pass'=>$_pass,'permission'=>$_perm));
 	}
 	function removeUser($uid) {
-		$this->pquery("DELETE FROM users WHERE Uid = :uid",array('uid'=>$uid));
+		return $this->pquery("DELETE FROM users WHERE Uid = :uid",array('uid'=>$uid));
 	
+	}
+	function approveFile($path) {
+		$this->pquery("UPDATE queue SET Approve=1 WHERE Path=:path AND Task='Copy'",array('path'=>$path));
 	}
 	function addPi($IP, $Hostel, $Uid, $Pass, $Port) {
 //		$_Pass=md5($Pass);
