@@ -30,7 +30,8 @@ class App:
         'picsatatime':4, # 1,2, or 4
         'tilingpad':[2,2], #horiz,vert
         'refreshcount':{1:10,2:10,4:10}, #After how many iterations ought I refresh? [PAT1,PAT2,PAT3]
-        'mainpad':[[10,10],[10,10]] #Central canvas margins, [[left,right],[top,bottom]]
+        'mainpad':[[10,10],[50,10]], #Central canvas margins, [[left,right],[top,bottom]]
+         'logoscale':[200,40] 
         }
         try:
             x=open('config.json')
@@ -56,7 +57,6 @@ class App:
         self.can.pack(expand=True,fill=BOTH)
         self.can.bind('<Double-1>',self.close)
         self.getticker()
-
         self.tickertext=self.can.create_text(self.can.canvasx(0),self.can.canvasy(0),text=self.tickerlist,  fill=self.config['tickerstyle'][0], font=self.config['tickerstyle'][1])
         a=self.can.bbox(self.tickertext)
         self.imgbbox=[self.windowd[0]-self.config['mainpad'][0][0]-self.config['mainpad'][0][1],self.windowd[1]-self.config['tickerpad'][0]-self.config['tickerpad'][1]-(a[3]-a[1])-self.config['mainpad'][1][0]-self.config['mainpad'][1][1]]
@@ -90,6 +90,8 @@ class App:
             self.imgs[1]=self.can.create_image(3*self.imgbbox[0]/4+self.config['tilingpad'][0]/2,self.imgbbox[1]/4-self.config['tilingpad'][1]/2,image=self.photos[self.config['directories'][1]][self.picindex[1]],anchor=CENTER)
             self.imgs[2]=self.can.create_image(self.imgbbox[0]/4-self.config['tilingpad'][0]/2,3*self.imgbbox[1]/4+self.config['tilingpad'][1]/2,image=self.photos[self.config['directories'][2]][self.picindex[2]],anchor=CENTER)
             self.imgs[3]=self.can.create_image(3*self.imgbbox[0]/4+self.config['tilingpad'][0]/2,3*self.imgbbox[1]/4+self.config['tilingpad'][1]/2,image=self.photos[self.config['directories'][3]][self.picindex[3]],anchor=CENTER)
+        self.loadLogo()
+        self.updLogo()
         master.after(self.config['tickerspeed'][1],self.moveticker)
         master.after(self.config['picspeed'],self.movepic)
         
@@ -146,6 +148,7 @@ class App:
             self.imgs[1]=self.can.create_image(3*self.imgbbox[0]/4+self.config['tilingpad'][0]/2,self.imgbbox[1]/4-self.config['tilingpad'][1]/2,image=self.photos[self.config['directories'][1]][self.picindex[1]],anchor=CENTER)
             self.imgs[2]=self.can.create_image(self.imgbbox[0]/4-self.config['tilingpad'][0]/2,3*self.imgbbox[1]/4+self.config['tilingpad'][1]/2,image=self.photos[self.config['directories'][2]][self.picindex[2]],anchor=CENTER)
             self.imgs[3]=self.can.create_image(3*self.imgbbox[0]/4+self.config['tilingpad'][0]/2,3*self.imgbbox[1]/4+self.config['tilingpad'][1]/2,image=self.photos[self.config['directories'][3]][self.picindex[3]],anchor=CENTER)
+        self.updLogo()
         self.rt.after(self.config['picspeed'],self.movepic)
 
 
@@ -214,8 +217,15 @@ class App:
             print "Image fetch&parse successful"
         except IOError as e:
             print "I/O error({0}): {1}".format(e.errno, e.strerror)
-
-
+    
+    def updLogo(self):
+         self.logoC=self.can.create_image(self.windowd[0],0,image=self.logo,anchor=NE)
+		
+    def loadLogo(self):
+         self.logo=Image.open("logo.png") 
+         self.logo.thumbnail((self.config['logoscale'][0],self.config['logoscale'][0]))
+         self.logo = ImageTk.PhotoImage(self.logo)
+         
     def close(self,event):
         self.frame.quit()
 
