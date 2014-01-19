@@ -393,7 +393,7 @@ foreach ($pis as $pi) {
             return true;
         }
         function showAll(){
-          $('.approvaltr,approvaltr tc').show()
+          $('.approvaltr,approvaltr td').show()
         }
         function hideSome(){
           $('.approvaltr').each(function(){
