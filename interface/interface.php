@@ -387,7 +387,7 @@ foreach ($pis as $pi) {
         function approveImg(path){
           $.post('action.php',{'task':'Approve','path':path},function(data){
             if(data!="true"){return;}
-              $('tr[data-path='+path+']').fadeOut().remove()
+              $('tr[data-path="'+path+'"][data-type=Create]').fadeOut().remove()
               
             })
             return true;
