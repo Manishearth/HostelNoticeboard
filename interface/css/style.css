@@ -1,17 +1,3 @@
 .container{
   display:inline;
 }
-#postComplaint{
-  width:70%;
-  position:absolute;
-  left:20%;
-}
-#viewComplaint{
-  width:70%;
-  position:absolute;
-  left:20%;
-  display:none;
-}
-#postComplaintBtn,#viewComplaintBtn{
-  cursor: pointer;
-}

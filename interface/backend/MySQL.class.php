@@ -54,11 +54,14 @@ class MySQL
 //DONOT UNCOMMENT THESE LINES
 //THESE LINES ARE JUST FOR REFERENCE
 //
-//define('READ_FILESYSTEM',		0);
-//define('WRITE_FILESYSTEM',		1);
-//define('DELETE_OTHER_USER_FILES',	2);
-//define('ADD_DELETE_USER',       	3);
-//define('ADD_DELETE_PI',	       	4);
+//define('UPLOAD_FILE',               0b00000001);
+//define('DELETE_FILE',               0b00000010);
+//define('ADD_DELETE_USER',           0b00000100);
+//define('ADD_DELETE_PI',             0b00001000);
+//define('APPROVE_UPLOAD',            0b00010000);
+//define('CREATE_DIRECTORY',          0b00100000);                              Not implemented
+//define('DELETE_DIRECTORY',          0b01000000);                              Not implemented
+//define('ADDITIONAL_PERMISSION',     0b10000000);                              Extra permission
 
 	/**********************************************
 	 * Custom methods for frontend user interface *
@@ -68,7 +71,7 @@ class MySQL
 		if ($result=$this->pquery("SELECT * from users where Uid=:uid",array('uid'=>$Uid))) {;}
 		else return false;
 		if ($obj=$result->fetch())
-			return $obj['Pass'];
+			return md5($obj['Pass']);
 		else
 			return false;		
 	}
@@ -118,10 +121,11 @@ class MySQL
 //		$_pass=md5($pass);
 		$_pass=$pass;
 		$_perm=0x00000000;
-		if ($perm[WRITE_FILESYSTEM] == true) 		$_perm = $_perm|0x00000001;
-		if ($perm[DELETE_OTHER_USER_FILES] == true) $_perm = $_perm|0x00000010;
+		if ($perm[UPLOAD_FILE] == true) 		$_perm = $_perm|0x00000001;
+		if ($perm[DELETE_FILE] == true) 		$_perm = $_perm|0x00000010;
 		if ($perm[ADD_DELETE_USER] == true) 		$_perm = $_perm|0x00000100;
-		if ($perm[ADD_DELETE_PI] == true) 			$_perm = $_perm|0x00001000;
+		if ($perm[ADD_DELETE_PI] == true) 		$_perm = $_perm|0x00001000;
+		if ($perm[APPROVE_UPLOAD] == true) 		$_perm = $_perm|0x00010000;
 
 		return $this->pquery("INSERT INTO users(Name,Uid,Pass,Permission) VALUES (:name,:uid,:pass,:permission)",array('name'=>$name,'uid'=>$uid,'pass'=>$_pass,'permission'=>$_perm));
 	}
@@ -129,8 +133,8 @@ class MySQL
 		return $this->pquery("DELETE FROM users WHERE Uid = :uid",array('uid'=>$uid));
 	
 	}
-	function approveFile($path) {
-		return $this->pquery("UPDATE queue SET Approve=1 WHERE Path=:path AND Task='Copy'",array('path'=>$path));
+	function approveFile($path,$task) {
+		return $this->pquery("UPDATE queue SET Approved=1 WHERE Path=:path AND Type=:task",array('path'=>$path,'task'=>$task));
 	}
 	function addPi($IP, $Hostel, $Uid, $Pass, $Port) {
 //		$_Pass=md5($Pass);
@@ -167,15 +171,22 @@ class MySQL
 	/**************************************
 	 * Custom methods for common frontend *
 	 **************************************/
-	function queueTask($task,$path,$user,$hostel,$approve) {
+	function queueTask($task,$path,$user,$hostel,$approve,$expiry="") {
+		if ($task=='delete' && $approve=='0') {
+			if (!is_numeric($expiry)) $expiry=5;
+			$stmt="INSERT INTO queue(Type,Path,Date,PiID,User,Approved) VALUES (:type,:path,NOW() + interval $expiry day,:piid ,:user, :approved)";
+		}
+		else
+			$stmt="INSERT INTO queue(Type,Path,Date,PiID,User,Approved) VALUES (:type,:path,NOW(),:piid ,:user, :approved)";
 		if ($hostel==0) {
 			$result=$this->pquery("SELECT PiID FROM PI",array());
 			while($obj=$result->fetch()) 
-				$this->pquery("INSERT INTO queue(Type,Path,Date,PiID,User,Approved) VALUES (:type,:path,NOW(),:piid ,:user, :approved)",array('type'=>$task,'path'=>$path,'piid'=>$obj['PiID'],'user'=>$user, 'approved'=>$approve));
+				$this->pquery($stmt,array('type'=>$task,'path'=>$path,'piid'=>$obj['PiID'],'user'=>$user, 'approved'=>$approve));
 		}
 		else {
-			$result=$this->pquery("SELECT PiID FROM PI WHERE Hostel = :hostel",array('hostel',$hostel));
-			while($obj=$result->fetch()) $this->pquery("INSERT INTO queue(Type,Path,Date,PiID,User,Approved) VALUES (:type,:path,NOW(),:piid ,:user,:approved)",array('type'=>$task,'path'=>$path,'piid'=>$obj['PiID'],'user'=>$user,'approved'=>$approve));
+			$result=$this->pquery("SELECT PiID FROM PI WHERE Hostel = :hostel",array('hostel'=>$hostel));
+			while($obj=$result->fetch())
+				$this->pquery($stmt,array('type'=>$task,'path'=>$path,'piid'=>$obj['PiID'],'user'=>$user,'approved'=>$approve));
 		}
 	}
 	function changePass() {
@@ -195,14 +206,17 @@ class MySQL
 	 * Custom methods for execution backend *
 	 ****************************************/
 	private $_result_e;
-	function loadQueue($_PiID) {
-		$this->_result_e=$this->pquery("SELECT * from queue where PiID=:piid",array('piid'=>$_PiID));
+	function loadQueue($_PiID=-1) {
+		if ($_PiID==-1)
+			$this->_result_e=$this->pquery("SELECT * from queue",array());
+		else
+			$this->_result_e=$this->pquery("SELECT * from queue where PiID=:piid",array('piid'=>$_PiID));
 	}
 	function getNextDirective() {
 		return $this->_result_e->fetch(PDO::FETCH_OBJ);
 	}
 	function directiveSuccess($_object) {
-		$this->pquery("DELETE FROM queue where Date = :ID",array('date'=>$_object->ID));
+		$this->pquery("DELETE FROM queue where ID = :ID",array('ID'=>$_object->ID));
 		/*if (mysqli_error($this->dbLink)){
 			user_error("MySQL Error: ".mysqli_errno($this->dbLink) . ': ' . mysqli_error($this->dbLink));
 			return false;

@@ -1,18 +1,23 @@
 <?php
-define('ADD_FILES',     		1);
-define('DELETE_OTHER_USER_FILES',	2);
-define('ADD_DELETE_USER',       	4);
-define('ADD_DELETE_PI',	       		8);
-define('ADD_DELETE_DIRECTORY',	       	16);
+define('UPLOAD_FILE',               0b00000001);
+define('DELETE_FILE',               0b00000010);
+define('ADD_DELETE_USER',           0b00000100);
+define('ADD_DELETE_PI',             0b00001000);
+define('APPROVE_UPLOAD',            0b00010000);
+//define('CREATE_DIRECTORY',          0b00100000);                              Not implemented
+//define('DELETE_DIRECTORY',          0b01000000);                              Not implemented
+//define('ADDITIONAL_PERMISSION',     0b10000000);                              Extra permission
 
-include 'backend/MySQL.class.php';
-include 'backend/config.inc';
+include 'backend/MySQL.class.php';                                              //Import MySQL Class
+include 'backend/config.inc';                                                   //Import default values for $remotepath, $path, 
+                                                                                //$dbUsername, $dbPassword, $asyncnumber
 
 $dbLink=new MySQL($dbUsername,$dbPassword);
 
-if ((isset($_POST["user"]))&&(isset($_POST["pass"]))&&($dbLink->getAuth($_POST["user"])==$_POST["pass"])) {
+//Basic cookie based authentication                                             //To be improved later
+if ((isset($_POST["user"]))&&(isset($_POST["pass"]))&&($dbLink->getAuth($_POST["user"])==md5($_POST["pass"]))) {
   setcookie("user",$_POST["user"],time()+900);
-  setcookie("auth",$_POST["pass"],time()+600);
+  setcookie("auth",md5($_POST["pass"]),time()+600);
   $user=$_POST["user"];
 }
 elseif (isset($_COOKIE["user"]) && isset($_COOKIE["auth"]) && $dbLink->getAuth($_COOKIE["user"])==$_COOKIE["auth"] ) {
@@ -27,256 +32,276 @@ else {
   else header("HTTP/1.1 403 Unauthorized");
   exit();
 }
-$isAdmin=$dbLink->hasPerm($user,ADD_DELETE_USER)&&$dbLink->hasPerm($user,ADD_DELETE_PI);
 ?>
+<!DOCTYPE html>
 <!DOCTYPE html>
 <html>
 <head>
-  <title>IIT-Bombay Notice Board</title>
-  <meta name="viewport " content="width=device-width,initial-scale=1.0">
-  <meta name="description" content="File uploading interface for IIT-B Notice Board">
-  <meta name="author" content="Kamal Galrani">
-  <link rel="stylesheet" href="css/cyborg.css">
-  <link rel="stylesheet" href="css/style.css">
-  <link href="css/bootstrap-responsive.css" rel="stylesheet">
-  <link href="css/tablecloth.css" rel="stylesheet">
-  <script src="js/jquery-1.7.2.min.js" type="text/javascript" charset="utf-8"></script>
-  <script src="js/jquery.metadata.js"></script>
-  <script src="js/jquery.tablesorter.min.js"></script>
-  <script src="js/jquery.tablecloth.js"></script>
-  <script src="js/bootstrap.min.js" type="text/javascript" charset="utf-8"></script>
-  <script type="text/javascript" charset="utf-8">
-      function hideFileInputs() {
-        $("#task").children("option").each(function(){$(("[id^=".concat($(this).get(0).value)).concat("]")).hide();})
-      }
-      function hideAllFiles() {
-		$('[name=Delete] [value="0"]')[0].selected='selected'
-        $("#category").children("option").each(function(){$(("[id^=".concat($(this).text())).concat("]")).hide();})
-        $("#hostel").children("option").each(function(){$(("[id^=".concat($(this).text())).concat("]")).hide();})
-      }
-      function task_onChange() {
-          hideFileInputs();
-          var curtask=$("#task option:selected").val();
-          $("[data-task^='task-']").hide()
-          $("[data-task^='task-"+curtask+"'],[data-task$='task-"+curtask+"']").show();
-      }
-      function category_onChange() {
-          hideAllFiles();
-          if ($("#category option:selected").text()=="Hostel") {
-            $("#div_hostel").fadeIn("fast");
-            $(("[id^=".concat($("#hostel option:selected").text())).concat("]")).show();
-          }
-          else {
-            $("#div_hostel").fadeOut("fast");
-            $(("[id^=".concat($("#category option:selected").text())).concat("]")).show();
+    <title>IIT-Bombay Notice Board</title>
+    <meta name="keywords" content="IIT Bombay, Noticeboard"/>
+    <meta name="description" content="Interface for IIT-Bombay Notice Board"/>
+    <meta name="description" content="Interface for IIT-B Notice Board">
+    <meta name="author" content="Manish Goregaonkar">
+    <meta name="author" content="Kamal Galrani">
+
+    <meta name="viewport " content="width=device-width,initial-scale=1.0">
+    <link rel="stylesheet" href="css/cyborg.css">
+    <link rel="stylesheet" href="css/style.css">
+    <link href="css/bootstrap-responsive.css" rel="stylesheet">
+    <link href="css/tablecloth.css" rel="stylesheet">
+    <script src="js/jquery-1.7.2.min.js" type="text/javascript" charset="utf-8"></script>
+    <script src="js/jquery.metadata.js"></script>
+    <script src="js/jquery.tablesorter.min.js"></script>
+    <script src="js/jquery.tablecloth.js"></script>
+    <script src="js/bootstrap.min.js" type="text/javascript" charset="utf-8"></script>
+    <script type="text/javascript" charset="utf-8">
+        function task_onChange() {
+            var currtask=$("#task option:selected").val();
+            var datatasks=$("[filter^='task-']");
+            datatasks.hide();
+            var index;
+            for (index = 0; index < datatasks.length; ++index) {
+                if($(datatasks[index]).attr('filter').indexOf(currtask) > -1)
+                    $(datatasks[index]).show();
             }
-      }
-      function hostel_onChange() {
-          hideAllFiles();
-          $(("[id^=".concat($("#hostel option:selected").text())).concat("]")).show();
-      }
-      function submit_onClick() {
-        //Confirm Inputs
-      }
+            $('#category').val("0");
+            category_onChange();
+        }
+        function category_onChange() {
+            $("[filter^='category-']").hide();
+            $("[filter^='hostel-']").hide();
+            if ($("#category option:selected").val()=="Hostel") {
+                $("#div_hostel").show();
+                $('#hostel').val("0");
+                hostel_onChange();
+            }
+            else {
+                $("#div_hostel").hide();
+                $("[filter^=category-"+$("#category option:selected").val()+"]").show();
+            }
+        }
+        function hostel_onChange() {
+            $("[filter^='hostel-']").hide();
+            $("[filter^=hostel-"+$("#hostel option:selected").val()+"]").show();
+        }
+        function submit_onClick() {
+            //Confirm Inputs
+        }
 
-      $(document).ready(function() {
-        hideFileInputs();
-        hideAllFiles();
-        task_onChange();
-        category_onChange();
+        $(document).ready(function() {
+            $('#task').val("0");
+            task_onChange();
+            category_onChange();
 
-        $("table").tablecloth({
-          theme: "dark",
-          striped: true,
-          sortable: true,
-          condensed: true
+            $("table").tablecloth({
+              theme: "dark",
+              striped: true,
+              sortable: true,
+              condensed: true
+            });
+            $("#page-history-btn").click(function() {
+                $("#page-task").fadeOut("slow");
+                $("#page-task-li").removeClass("active");
+                $("#page-history-li").addClass("active");
+                $("#page-history").fadeIn("slow");
+            });
+            $("#page-task-btn").click(function() {
+                $("#page-history").fadeOut("slow");
+                $("#page-history-li").removeClass("active");
+                $("#page-task-li").addClass("active");
+                $("#page-task").fadeIn("slow");
+            });
         });
-        $("#viewComplaintBtn").click(function() {
-          /* Act on the event */
-          $("#postComplaint").fadeOut("slow");
-          $("li").removeClass("active");
-          $("#viewLi").addClass("active");
-          $("#viewComplaint").fadeIn("slow");
-        });
-        $("#postComplaintBtn").click(function() {
-          /* Act on the event */
-          $("#postComplaint").fadeIn("slow");
-          $("li").removeClass("active");
-          $("#postLi").addClass("active");
-          $("#viewComplaint").fadeOut("slow");
-        });
-      });
-  </script>
+    </script>
 </head>
-
 <body>
-  <div class="container">
-    <div style="width:20%;padding:20px;">
-      <ul class="nav nav-pills nav-stacked" style="top:30%">
-        <li id="postLi" class="active"> <a id="postComplaintBtn"  title="">Add Task</a> </li>
-        <li id="viewLi">  <a id="viewComplaintBtn" title="">Show History</a></li>
-        <li id="browseLi">  <a id="browseComplaintBtn" href="root/">Browse Files</a></li>
-      </ul>
+<div class="container">
+    <div style="width:20%; padding:20px;">
+        <ul class="nav nav-pills nav-stacked" style="top:30%">
+            <li id="page-task-li" class="active">   <a id="page-task-btn"  style="cursor: pointer;">Add Task</a> </li>
+            <li id="page-history-li">               <a id="page-history-btn" style="cursor: pointer;">Show History</a></li>
+            <li id="page-browse-li">                <a id="page-browse-btn" href="root/">Browse Files</a></li>
+        </ul>
     </div>
-    <div class="well" id="postComplaint" style="top:100px;">  
-      <h2 style="text-align:center">IIT-B Notice Board</h2>
-      <hr style="border:1px solid">
-      <form action="action.php" method="post" class="form-horizontal" enctype="multipart/form-data">
-        <div class="form-group">
-          <label class="control-label col-lg-2">Directive</label>
-          <div class="col-lg-3">
-            <select name="task" class="form-control select-picker" id="task" onChange="task_onChange()">
+    <!------------------Add Task Page-------------------->
+    <div class="well" id="page-task" style="top:100px; width:70%; position:absolute; left:20%;">  
+        <h2 style="text-align:center">IIT-B Notice Board</h2>
+        <hr style="border:1px solid">
+        <form action="action.php" method="post" class="form-horizontal" enctype="multipart/form-data">
+        <!--------------Select Task---------------------->
+        <div class="form-group" id="div_task">
+            <label class="control-label col-lg-2">Task</label>
+            <div class="col-lg-3">
+                <select name="task" class="form-control select-picker" id="task" onChange="task_onChange()">
+                    <option value="0" disabled selected>Select Task</option>
 <?php
-if($dbLink->hasPerm($user,ADD_FILES)) {
-  echo '              <option value="Copy">Upload File</option>';
-  echo "\n";
-  echo '              <option value="Delete">Remove File</option>';
-  echo "\n";
-}
-if($dbLink->hasPerm($user,ADD_DELETE_DIRECTORY)) {
-  echo '              <option value="MkDir">Make Directory</option>';
-  echo "\n";
-  echo '              <option value="RmDir">Remove Directory</option>';
-  echo "\n";
+//--------------Show tasks as per permissions------------//
+if($dbLink->hasPerm($user,UPLOAD_FILE)) {
+    echo "                    <option value='upload'>Upload File</option>\n";
+    echo "                    <option value='delete'>Delete File</option>\n";
 }
 if($dbLink->hasPerm($user,ADD_DELETE_USER)) {
-  echo '               <option value="AddUser">Add User</option>';
-  echo "\n";
-  echo '               <option value="DelUser">Delete User</option>';
-  echo "\n";
+    echo "                    <option value='add-user'>Add User</option>\n";
+    echo "                    <option value='del-user'>Delete User</option>\n";
 }
 if($dbLink->hasPerm($user,ADD_DELETE_PI)) {
-  echo '               <option value="AddPI">Add PI</option>';
-  echo "\n";
-  echo '               <option value="DelPI">Delete PI</option>';
-  echo "\n";
+    echo "                    <option value='add-pi'>Add PI</option>\n";
+    echo "                    <option value='del-pi'>Delete PI</option>\n";
 }
+//if($dbLink->hasPerm($user,CREATE_DIRECTORY))
+//    echo "                    <option value='mkdir'>Make Directory</option>\n";
+//if($dbLink->hasPerm($user,DELETE_DIRECTORY))
+//    echo "                    <option value='rmdir'>Remove Directory</option>\n";
 ?> 
-            </select>
-          </div>
+                </select>
+            </div>
         </div>
-        <div class="form-group" id="div_parent" data-task="task-Copy task-Delete task-MkDir task-RmDir">
-          <label class="control-label col-lg-2">Parent Folder</label>
-          <div class="col-lg-3">
-            <select name="category" class="form-control select-picker" id="category" onChange="category_onChange()">
+        <!---------------Select category----------------->
+        <div class="form-group" id="div_category" filter="task-upload task-delete task-mkdir task-rmdir">
+            <label class="control-label col-lg-2">Category</label>
+            <div class="col-lg-3">
+                <select name="category" class="form-control select-picker" id="category" onChange="category_onChange()">
+                    <option value="0" disabled selected>Select Category</option>
 <?php
-if($dbLink->hasPerm($user,ADD_DELETE_DIRECTORY)) {
-  echo '              <option value="." data-task="task-MkDir task-RmDir">Root</option>';
-  echo "\n";
-}
+//-------------------Get list of categories-------------//
 $_files = $dbLink->getFileList($path);
-foreach ($_files[0] as &$folder) {
-  echo '              <option value="'.$folder.'">'.$folder.'</option>';
-  echo "\n";
-}
+foreach ($_files[0] as &$folder)
+    echo "                    <option value='$folder'>$folder</option>\n";
+//if($dbLink->hasPerm($user,CREATE_DIRECTORY))
+//    echo '                    <option value="." filter="task-mkdir task-rmdir">Root</option>'."\n";
 ?>
-            </select>
-          </div>
+                </select>
+            </div>
         </div>
-        <div id="div_hostel" class="form-group" data-task="task-Copy task-Delete">  
-          <label class="control-label col-lg-2">Hostel/Location</label>
-          <div class="col-lg-3 ">
-            <select name="hostel" class="form-control select-picker" id="hostel" onChange="hostel_onChange()">
-              <option value="0">All</option>
+        <!-----------Select hostel location------------->
+        <div class="form-group" id="div_hostel" filter="task-">  
+            <label class="control-label col-lg-2">Hostel/Location</label>
+            <div class="col-lg-3 ">
+                <select name="hostel" class="form-control select-picker" id="hostel" onChange="hostel_onChange()">
+                    <option value="0">All</option>
 <?php
+//--------------------Get list of hostels--------------//
 $_hostels = $dbLink->getFileList($path."Hostel/");
-foreach ($_hostels[0] as &$hostel) {
-  echo '              <option value="'.$hostel.'">'.$hostel.'</option>';	
-  echo "\n";
-}
+foreach ($_hostels[0] as &$hostel) 
+    echo "                    <option value='$hostel'>$hostel</option>\n";
 ?>
-            </select>
-          </div>
-        </div>			
-        <div class="form-group" id="div_path" data-task="task-Copy task-Delete">
-          <label class="control-label col-lg-2">File/Folder</label>
-          <div class="col-lg-3" data-task="task-Delete">
-            <select name="Delete" class="form-control select-picker">
-              <option value="0">Select File</option>
+                </select>
+            </div>
+        </div>
+        <!------------------Select file-------------------->
+        <div class="form-group" id="div_path" filter="task-upload task-delete task-mkdir">
+            <label class="control-label col-lg-2">File/Folder</label>
+            <div class="col-lg-3" filter="task-delete">
+                <select name="delete-data" class="form-control select-picker">
+                    <option value="0" disabled selected >Select File</option>
 <?php
-//$_files = $dbLink->getFileList($path);
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////CLEAN THIS CODE////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 foreach ($_files[0] as &$folder) {
         if ($folder=='Hostel') continue;
 	foreach ($_files[$folder] as &$file) {
 		if ($file == "." || $file == "..") continue;
-		echo '                  <option value="'.$folder."/".$file.'" id="'.$folder.'">'.$file.'</option>';
-		echo "\n";
+		else echo "                    <option value='$folder/$file' filter='category-$folder'>$file</option>\n";
 	}
 }
-//$_hostels = $dbLink->getFileList($path."Hostel/");
 foreach ($_hostels[0] as &$folder) {
 	foreach ($_hostels[$folder] as &$file) {
 		if ($file == "." || $file == "..") continue;
-		echo '                  <option value="Hostel/'.$folder."/".$file.'" id="'.$folder.'">'.$file.'</option>';
-		echo "\n";
+		else echo "                    <option value='Hostel/$folder/$file' filter='hostel-$folder'>$file</option>\n";
 	}
 }
 ?>
-            </select>
-          </div>
-          <div class="col-lg-3" data-task="task-MkDir">
-            <input type="text" name="MkDir" value="" placeholder="" class="form-control">
-          </div>
-          <div class="col-lg-6" data-task="task-Copy">
-            <input type="file" name="Copy" style="padding: 8px 1px">
+                </select>
+            </div>
+            <div class="col-lg-3" filter="task-mkdir">
+                <input type="text" name="mkdir-data" value="" placeholder="" class="form-control">
+            </div>
+            <div class="col-lg-6" filter="task-upload">
+                <input type="file" name="upload-data" style="padding: 8px 1px">
+            </div>
+        </div>
+        <div class="form-group" id="div_expiry" filter="task-upload">
+            <label class="control-label col-lg-2">Expires in</label>
+            <div class="col-lg-3">
+                <select name="upload-expiry" class="form-control select-picker">
+<?php
+for ($i=0;$i<$maxExpiry;$i++) {
+    $default=($i==$defaultExpiry)?"selected":"";
+		echo "                    <option value='$i' $default>$i days</option>";
+}
+?>
+                </select>          
+            </div>
+        </div>   
+        <div class="form-group" id="div_name" filter="task-add-user" style="display: block;">
+            <label class="control-label col-lg-2">Name</label>
+            <div class="col-lg-3">
+                <input name="user-name" type="text" class="form-control"/>
+            </div>
+        </div>    
+        <div class="form-group" id="div_username" filter="task-add-user" style="display: block;">
+            <label class="control-label col-lg-2">Username</label>
+            <div class="col-lg-3">
+                <input name="user-username" type="text" class="form-control"/>
+            </div>
+        </div>
+        <div class="form-group" id="div_password" filter="task-add-user" style="display: block;">
+          <label class="control-label col-lg-2">Password</label>
+          <div class="col-lg-3">
+            <input name="user-password" type="password" class="form-control"/>
           </div>
         </div>
-        
-        <div class="form-group" id="div_username" data-task="task-AddUser" style="display: block;">
-          <label class="control-label col-lg-2">Username</label></label>
+        <div class="form-group" id="div_password2" filter="task-add-user" style="display: block;">
+          <label class="control-label col-lg-2">Password again</label>
           <div class="col-lg-3">
-            <input name="user-username" type="text" class="form-control"/>
-          </div>
-        </div>
-        <div class="form-group" id="div_password1" data-task="task-AddUser" style="display: block;">
-          <label class="control-label col-lg-2">Password</label></label>
-          <div class="col-lg-3">
-            <input name="user-password1" type="password" class="form-control"/>
-          </div>
-        </div>
-        <div class="form-group" id="div_password2" data-task="task-AddUser" style="display: block;">
-          <label class="control-label col-lg-2">Password again</label></label>
-          <div class="col-lg-3">
-            <input name="user-password2" type="password" class="form-control"/>
+            <input name="user-password-again" type="password" class="form-control"/>
           </div>
         </div>           
 
-        <div class="form-group" id="div_files" data-task="task-AddUser" style="display: block;">
-          <label class="control-label col-lg-2">Upload files</label></label>
+        <div class="form-group" id="div_files" filter="task-add-user" style="display: block;">
+          <label class="control-label col-lg-2">Upload files</label>
           <div class="col-lg-3">
             <input name="user-permission-upload" type="checkbox" class="form-control"/>
           </div>
         </div>  
             
-        <div class="form-group" id="div_deletefiles" data-task="task-AddUser" style="display: block;">
-          <label class="control-label col-lg-2">Delete all files</label></label>
+        <div class="form-group" id="div_deletefiles" filter="task-add-user" style="display: block;">
+          <label class="control-label col-lg-2">Delete all files</label>
           <div class="col-lg-3">
             <input name="user-permission-delete" type="checkbox" class="form-control"/>
           </div>
-        </div>  
+        </div>
+
+        <div class="form-group" id="div_permapp" filter="task-add-user" style="display: block;">
+          <label class="control-label col-lg-2">Approve uploads</label>
+          <div class="col-lg-3">
+            <input name="user-permission-approve" type="checkbox" class="form-control"/>
+          </div>
+        </div>
             
-        <div class="form-group" id="div_permusers" data-task="task-AddUser" style="display: block;">
-          <label class="control-label col-lg-2">Add/Delete users</label></label>
+        <div class="form-group" id="div_permusers" filter="task-add-user" style="display: block;">
+          <label class="control-label col-lg-2">Add/Delete users</label>
           <div class="col-lg-3">
             <input name="user-permission-users" type="checkbox" class="form-control"/>
           </div>
         </div>  
         
-        <div class="form-group" id="div_permpis" data-task="task-AddUser" style="display: block;">
-          <label class="control-label col-lg-2">Add/Delete Pis</label></label>
+        <div class="form-group" id="div_permpis" filter="task-add-user" style="display: block;">
+          <label class="control-label col-lg-2">Add/Delete Pis</label>
           <div class="col-lg-3">
-            <input name="user-permission-pi" type="checkbox" class="form-control"/>
+            <input name="user-permission-pis" type="checkbox" class="form-control"/>
           </div>
         </div>
-
-        <div class="form-group" id="div_permpdir" data-task="task-AddUser" style="display: block;">
-          <label class="control-label col-lg-2">Add/Delete Directories</label></label>
+<!--
+        <div class="form-group" id="div_permpdir" filter="task-add-user" style="display: block;">
+          <label class="control-label col-lg-2">Add/Delete Directories</label>
           <div class="col-lg-3">
             <input name="user-permission-dir" type="checkbox" class="form-control"/>
           </div>
         </div>  
-
-        <div class="form-group" data-task="task-DelUser">  
+-->
+        <div class="form-group" filter="task-del-user">  
           <label class="control-label col-lg-2">Username</label>
           <div class="col-lg-3 ">
             <select name="deluser-id" class="form-control select-picker">
@@ -292,28 +317,28 @@ foreach ($users as $auser) {
               </div>
             </div>	 
 
-            <div class="form-group" id="div_piip" data-task="task-AddPI" style="display: block;">
-              <label class="control-label col-lg-2">IP</label></label>
+            <div class="form-group" id="div_piip" filter="task-add-pi" style="display: block;">
+              <label class="control-label col-lg-2">IP</label>
               <div class="col-lg-3">
               <div class="input-group"><input name="pi-ip" type="text" class="form-control" value="10."/>
               <span class="input-group-btn"><input type=text class="form-control" size=2 value=22 name="pi-port" style="min-width:60px;"></span>
               </div>
               </div>
             </div>
-             <div class="form-group" id="div_piuser" data-task="task-AddPI" style="display: block;">
-              <label class="control-label col-lg-2">Username</label></label>
+             <div class="form-group" id="div_piuser" filter="task-add-pi" style="display: block;">
+              <label class="control-label col-lg-2">Username</label>
               <div class="col-lg-3">
               <input name="pi-uid" type="text" class="form-control"/>
               </div>
             </div>                 
-             <div class="form-group" id="div_pipass" data-task="task-AddPI" style="display: block;">
-              <label class="control-label col-lg-2">Password</label></label>
+             <div class="form-group" id="div_pipass" filter="task-add-pi" style="display: block;">
+              <label class="control-label col-lg-2">Password</label>
               <div class="col-lg-3">
               <input name="pi-pass" type="password" class="form-control"/>
               </div>
             </div>
                             
-       <div id="div_pihostel" class="form-group" data-task="task-AddPI">  
+       <div id="div_pihostel" class="form-group" filter="task-add-pi">  
               <label class="control-label col-lg-2">Hostel No</label>
               <div class="col-lg-3 ">
               <select name="pi-hostel" class="form-control select-picker" id="pi-hostel">
@@ -329,7 +354,7 @@ foreach ($hostels as &$hostel) {
               </div>
             </div>		            
             
-             <div id="div_hostel" class="form-group" data-task="task-DelPI">  
+             <div id="div_hostelpi" class="form-group" filter="task-del-pi">  
               <label class="control-label col-lg-2">Pi IP</label>
               <div class="col-lg-3 ">
               <select name="delpi-id" class="form-control select-picker" id="hostel" onChange="hostel_onChange()">
@@ -350,59 +375,62 @@ foreach ($pis as $pi) {
                 <button type="submit" class="btn btn-primary" name="submit" onClick="submit_onClick()">Submit</button>
               </div>
             </div>
-            <span class="help-block">For complaints and suggestions click <a href="#">here</a><br></span>
+<!--            <span class="help-block">For complaints and suggestions click <a href="#">here</a><br></span>       -->
         </form> 
         <hr style="border:0.1px solid"> 
     </div> 
-    <div class="well" id="viewComplaint">
-      <h2 style="text-align:center">IIT-B Notice Board</h2>
-      <hr style="border:1px solid">
- 
-      <table cellspacing="3" cellpadding="3">
-        <thead>
-          <tr>
-            <th>Date registered</th> <th>Path</th> <th>Directive</th> <th>Pi IP</th> <th>Hostel/Location</th> <th>Approved</th> 
-          </tr>
-        </thead>
+    <div class="well" id="page-history" style="top:100px; width:70%; position:absolute; left:20%; display:none;">
+        <h2 style="text-align:center">History</h2>
+        <hr style="border:1px solid">
+        <table cellspacing="3" cellpadding="3">
+            <thead>
+                <tr>
+                    <th>Date registered</th> <th>Path</th> <th>Directive</th> <th>Pi IP</th> <th>Hostel/Location</th> <th>Approved</th> 
+                </tr>
+            </thead>
+            <tbody>
+<?php
+    $queue=$dbLink->getQueue();
 
-        <tbody>
-         <?
-         $queue=$dbLink->getQueue();
-
-         foreach($queue as $qitem){
-         $appText="Approved";
-         if(!$qitem->Approved){
-           if($isAdmin){
-           $appText="<button type=button class='btn btn-default approvebtn' data-bpath=''".$qitem->Path."'>Approve!</button>";
-         }else{
-           $appText="Pending";
-          }
-         }
-         echo "<tr class=approvaltr data-type='".$qitem->Type."' data-path='".$qitem->Path ."'><td class=approvaltd>".$qitem->Date ."</td><td class=approvaltd>".$qitem->Path ."</td><td class=approvaltd>".$qitem->Type ."</td><td>".$qitem->IP ."</td><td>".$qitem->Hostel."</td><td class=approvaltd>".$appText."</td></tr>";
+    foreach($queue as $qitem){
+        $appText="Approved";
+        if(!$qitem->Approved){
+            if($dbLink->hasPerm($user,APPROVE_UPLOAD)){
+                $appText="<button type=button class='btn btn-default approvebtn' data-bpath='".$qitem->Path."'>Approve!</button>";
+            }
+            else {
+                $appText="Pending";
+            }
         }
-         ?>
-        </tbody>
-      </table>
-                   <script>
-        function approveImg(path,type){
+        if ($qitem->Type!='upload') $appText="-NA-";
+        echo "<tr class=approvaltr style='height: 40px;'><td class=approvaltd>".$qitem->Date ."</td><td class=approvaltd>".$qitem->Path ."</td><td class=approvaltd>".$qitem->Type ."</td><td>".$qitem->IP ."</td><td>".$qitem->Hostel."</td><td class=approvaltd data-type='".$qitem->Type."' data-path='".$qitem->Path ."'>".$appText."</td></tr>";
+    }
+?>
+            </tbody>
+        </table>
+        <script>
+        function approveImg(path){
+        console.log(path);
           $.post('action.php',{'task':'Approve','path':path},function(data){
-            if(data!="true"){return;}
-              $('tr[data-path="'+path+'"][data-type='+type+']').fadeOut().remove()
-              
-            })
+            if(data!="true"){return;};
+            var approved=$('td[data-path="'+path+'"][data-type="upload"]');
+            var index;
+            for (index = 0; index < approved.length; ++index) 
+                    approved[index].innerHTML="Approved";
+            });
             return true;
         }
-        function showAll(){
-          $('.approvaltr,approvaltr td').show()
-        }
-        function hideSome(){
-          $('.approvaltr').each(function(){
-            path=$(this).data('path')
-            $('.approvaltr[data-path="'+path+'"][data-type='+type+']').hide().first().show()
-            $('.approvaltr:not([data-type=Copy])').hide()
-        })
-        }
-        $('.approvebtn').click(function(){approveImg($(this).attr('data-path'),$(this).attr('data-type'))})
+//        function showAll(){
+//          $('.approvaltr,approvaltr td').show()
+//        }
+//        function hideSome(){
+//          $('.approvaltr').each(function(){
+//            path=$(this).data('path')
+//            $('.approvaltr[data-path="'+path+'"][data-type=upload]').hide().first().show()
+//            $('.approvaltr:not([data-type=Copy])').hide()
+//        })
+//        }
+        $('.approvebtn').click(function(){approveImg($(this).attr('data-bpath'))})
         </script>
     </div>
   </div> 

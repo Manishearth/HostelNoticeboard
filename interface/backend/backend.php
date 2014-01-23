@@ -1,51 +1,49 @@
 <?php
-/****************************************
-IIT Bombay Notice Board BackEnd
-
-Author: Kamal Galrani
-Date:	Nov, 8, 2013
-
-Usage 
-backend.php <PiID> [<asyncnumber>]
-*************************************/
-
 include 'MySQL.class.php';
 include 'SSH.class.php';
 include 'config.inc';
 
 $dbLink=new MySQL($dbUsername,$dbPassword);
 
-//-------------Initialising Variables--------------//
-$PiID = $argv[1];
-if(!is_numeric($PiID)) user_error("PiID should be a number\n");
-
-$runningasync=false;
-if(sizeof($argv)>2&&$argv[2]>1){
-	$runningasync=true;
+//-------------Initialising Variables---------------//
+if (sizeof($argv) != 2) {
+	echo ":::::ERROR:::::\t".date("d-m-Y H:i:s")."\tInvalid arguments\n";
+	echo "\n";
+	echo "Usage:\tphp backend.php <PiID>\n";
+	die("\n");
 }
 
+$PiID = $argv[1];
+if (!is_numeric($PiID)) {
+	echo ":::::ERROR:::::\t".date("d-m-Y H:i:s")."\tPiID should be a number. Exiting backend for $PiID\n";
+	die("\n");
+}
 
-$piDetails=$dbLink->getPiData($PiID);
-$ssh_host = $piDetails["IP"];
-$ssh_port = $piDetails["Port"];
-$ssh_auth_user = $piDetails["Uid"];
-$ssh_auth_pass = $piDetails["Pass"];
+//$runningasync=false;
+//if($asyncnumber>1){
+//	$runningasync=true;
+//}
+
+$piData        = $dbLink->getPiData($PiID);
+$ssh_host      = $piData["IP"];
+$ssh_port      = $piData["Port"];
+$ssh_auth_user = $piData["Uid"];
+$ssh_auth_pass = $piData["Pass"];
 
 //-------------------Main Code---------------------//
-
 $PI = new SSH_Connection($ssh_host,$ssh_port,$ssh_auth_user,$ssh_auth_pass);
 $dbLink->loadQueue($PiID);
 
 while($obj=$dbLink->getNextDirective()) {
 	if (!$obj->Approved) continue;
 	switch ($obj->Type) {
-	case "Copy":
-			$status = $PI->send($path.$obj->Path,$remotepath.$obj->Path,0644);
+	case "upload":
+		$status = $PI->send($path.$obj->Path,$remotepath.$obj->Path,0644);
 		break;
-	case "Delete":
+	case "delete":
 		$status = $PI->execute("rm -f ".$remotepath.$obj->Path, $dump);
 		break;
-	case "MkDir":
+	case "mkdir":
 		$status = $PI->execute("mkdir ".$remotepath.$obj->Path, $dump);
 		if (stripos($dump, "File Exists")!==false) $status=true;
 		break;
@@ -61,16 +59,16 @@ while($obj=$dbLink->getNextDirective()) {
 
 
 //If in async mode, spawn backend.php for next available Pi after clearing locks.
-if($runningasync){
-	$dbLink->setPiLockStatus($pendingPis[$i],0); //Release Pi
-	$pis=$dblink->getPendingUnlockedPis();
-	if(sizeof($pis)>0){
-		chdir($path);
-		chdir('../backend');
-		$dbLink->setPiLockStatus($pis[0],2); //Lock Pi
-		exec("php backend.php ".$pis[0]." ".$argv[2]." &");
-	}
-}
+//if($runningasync){
+//	$dbLink->setPiLockStatus($pendingPis[$i],0); //Release Pi
+//	$pis=$dblink->getPendingUnlockedPis();
+//	if(sizeof($pis)>0){
+//		chdir($path);
+//		chdir('../backend');
+//		$dbLink->setPiLockStatus($pis[0],2); //Lock Pi
+//		exec("php backend.php ".$pis[0]." ".$argv[2]." &");
+//	}
+//}
 
 
 //-------------Cleaning up before exit--------------//

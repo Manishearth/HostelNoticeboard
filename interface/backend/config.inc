@@ -1,6 +1,10 @@
 <?php
-$remotepath='~/';
+date_default_timezone_set('Asia/Calcutta');
+$remotepath='~/.HostelNoticeBoard/';
 $path='/var/www/root/';
 $dbUsername='root';
 $dbPassword='toor';
+$asyncnumber=2;
+$defaultExpiry=5;
+$maxExpiry=7;
 ?>

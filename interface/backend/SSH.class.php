@@ -24,6 +24,7 @@ private $ssh;
 private $FLAG;
 private $keepAlive;
 private $shell;
+private $attempt;
     
 //-------------Function Definitions--------------//
 
@@ -39,6 +40,8 @@ public function connect() {                                                     
                                                                                                     //Returns false on failure
     global $ssh,$scp;
     global $ssh_host, $ssh_port, $ssh_auth_user, $ssh_auth_pass;
+    global $attempt;
+    $attempt=0;
     while (true) {
         $ssh = new Net_SSH2($ssh_host,$ssh_port);
         if ($ssh->bitmap&NET_SSH2_MASK_CONSTRUCTOR) {
@@ -61,24 +64,25 @@ public function connect() {                                                     
     else echo "Authenticated :)\n";
 
     echo $ssh->exec('pwd');
-    $this->send('config.inc','config.inc',644);
     return true;
 }
 
 public function showConnection() {                                                                  //Shows ssh information
                                                                                                     //Returns false if session disconnected
+
+    global $attempt;
     echo "\n";
     echo "SSH Host: ".$GLOBALS['ssh_host'].":".$GLOBALS['ssh_port']."\n";
     echo "SSH User: ".$GLOBALS['ssh_auth_user']."\n";
     echo "Reconnect if dropped every ".$GLOBALS['keepAlive']." seconds.\n";
-
+    
     if ($GLOBALS['FLAG']!==0) {
         echo "Session Disconnected!\n";
         return false;
     }
-
+    
     if (!($this->execute("lastlog | grep '".$GLOBALS['ssh_auth_user']."'", $details))) {
-        if ($GLOBALS['keepAlive']!==-1) {
+        if ($GLOBALS['keepAlive']!==-1 && $attempt<5) {
             if ($this->connect()) {return $this->showConnection();}
         }
         echo "Session Disconnected!\n";
@@ -100,14 +104,16 @@ public function execute($command , &$reply = null) {												//Executes comma
 }
 
 public function send($src, $dst, $mode) {
-	global $ssh, $FLAG;
-	if ($FLAG !== 0) return false;
-    
+    global $ssh, $FLAG, $attempt;
+    if ($FLAG !== 0) return false;
     $scp = new Net_SCP($ssh);
 	if (!($scp->put($dst,$src,NET_SCP_LOCAL_FILE))) {
-		$this->showConnection();															        //showConnection tries to reconnect
+		if ($attempt==1) { $attempt = 0; return false; }
+		$this->showConnection();							        //showConnection tries to reconnect
+		$attempt = 1;
 		return $this->send($src, $dst, $mode);
 	}
+	$attempt = 0;
 	return true;
 }
 
