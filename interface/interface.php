@@ -34,7 +34,6 @@ else {
 }
 ?>
 <!DOCTYPE html>
-<!DOCTYPE html>
 <html>
 <head>
     <title>IIT-Bombay Notice Board</title>
