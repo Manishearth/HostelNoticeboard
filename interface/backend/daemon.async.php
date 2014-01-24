@@ -2,12 +2,18 @@
 include 'MySQL.class.php';
 include 'SSH.class.php';
 include 'config.inc';
-
+/*
 echo "::::WARNING::::\t".date("d-m-Y H:i:s")."\tAsynchronous connections not implemented. Running daemon.php instead...\n";
 chdir($path);
 chdir("../backend");
 exec("php daemon.php");
-/*
+*/
+if($asyncnumber<2){
+        chdir($path)
+        exec("php daemon.php");
+}
+
+
 $dbLink = new MySQL($dbUsername,$dbPassword);
 
 //-------------Approving delete for expired files--------------//
