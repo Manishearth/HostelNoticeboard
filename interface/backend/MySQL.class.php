@@ -234,8 +234,8 @@ class MySQL
 		}
 		if($setPendLock){
 			foreach($pendPis as $pendPi){
-				$this->pquery("UPDATE TABLE PI SET PendLock=0",array()); //Clear all locks
-				$this->pquery("UPDATE TABLE PI SET PendLock=1 WHERE PiID=:pp",array('pp'=>$pendPi));
+				$this->pquery("UPDATE PI SET PendLock=0",array()); //Clear all locks
+				$this->pquery("UPDATE PI SET PendLock=1 WHERE PiID=:pp",array('pp'=>$pendPi));
 			}
 		}
 		return $pendPis;

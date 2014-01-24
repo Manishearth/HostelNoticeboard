@@ -9,10 +9,9 @@ chdir("../backend");
 exec("php daemon.php");
 */
 if($asyncnumber<2){
-        chdir($path)
+        chdir($path);
         exec("php daemon.php");
 }
-
 
 $dbLink = new MySQL($dbUsername,$dbPassword);
 
@@ -30,6 +29,7 @@ while($obj=$dbLink->getNextDirective()) {
 //}
 
 $pendingPis=$dbLink->getPendingPis(true);//True argument sets all pending pi's PendLock status to 1
+
 chdir($path);
 chdir('../backend');
 for($i=0;$i<sizeof($pendingPis);$i++){
@@ -39,5 +39,5 @@ for($i=0;$i<sizeof($pendingPis);$i++){
 		break;
 	}
 }
-*/
+
 ?>
