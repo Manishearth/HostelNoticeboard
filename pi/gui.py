@@ -75,7 +75,7 @@ class App:
         
         if self.config['picsatatime']==1:
             self.picindex=[0]
-            self.imgs=[self.can.create_image(self.imgbbox[0]/2+self.config['mainpad'][0][0]/2,self.imgbbox[1]/2 +self.config['mainpad'][1][0]/2,image=self.photos[0],anchor=CENTER)]
+            self.imgs=[self.can.create_image(self.imgbbox[0]/2+self.config['mainpad'][0][0],self.imgbbox[1]/2 +self.config['mainpad'][1][0],image=self.photos[0],anchor=CENTER)]
         elif self.config['picsatatime']==2:
             self.picindex=[0,0]
 
@@ -131,7 +131,7 @@ class App:
             self.picindex[0]+=1
             if self.picindex[0] >= len(self.piclist):
                 self.picindex=[0]
-            self.imgs[0]=self.can.create_image(self.imgbbox[0]/2+self.config['mainpad'][0][0]/2,self.imgbbox[1]/2 +self.config['mainpad'][1][0]/2,image=self.photos[self.picindex[0]],anchor=CENTER)
+            self.imgs[0]=self.can.create_image(self.imgbbox[0]/2+self.config['mainpad'][0][0],self.imgbbox[1]/2 +self.config['mainpad'][1][0],image=self.photos[self.picindex[0]],anchor=CENTER)
         elif self.config['picsatatime']==2:
             for i in range(0,2):
                 self.picindex[i]+=1
