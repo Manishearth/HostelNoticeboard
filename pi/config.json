@@ -13,8 +13,8 @@
       "Hostel"
    ],
    "tickerpad":[0,2],
-   "tickerstyle":["white",["Helvectica","18"]],
+   "tickerstyle":["white",["Helvectica","24"]],
    "tickerrectcolor":"black",
-   "mainpad":[[1,1],[50,5]],
+   "mainpad":[[1,1],[50,1]],
    "logoscale":[200,40]
 }

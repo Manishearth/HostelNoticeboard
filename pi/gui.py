@@ -59,6 +59,7 @@ class App:
         self.getticker()
         self.tickertext=self.can.create_text(self.can.canvasx(0),self.can.canvasy(0),text=self.tickerlist,  fill=self.config['tickerstyle'][0], font=self.config['tickerstyle'][1])
         a=self.can.bbox(self.tickertext)
+        print a
         self.imgbbox=[self.windowd[0]-self.config['mainpad'][0][0]-self.config['mainpad'][0][1],self.windowd[1]-self.config['tickerpad'][0]-self.config['tickerpad'][1]-(a[3]-a[1])-self.config['mainpad'][1][0]-self.config['mainpad'][1][1]]
         self.getpiclist()
         self.tickerrect=self.can.create_rectangle(0,self.imgbbox[1]+self.config['mainpad'][1][0]+self.config['mainpad'][1][1],self.windowd[0],self.windowd[1],fill=self.config['tickerrectcolor'])
@@ -74,7 +75,7 @@ class App:
         
         if self.config['picsatatime']==1:
             self.picindex=[0]
-            self.imgs=[self.can.create_image(self.imgbbox[0]/2+self.config['mainpad'][0][0],self.imgbbox[1]/2 +self.config['mainpad'][1][0],image=self.photos[0],anchor=CENTER)]
+            self.imgs=[self.can.create_image(self.imgbbox[0]/2+self.config['mainpad'][0][0]/2,self.imgbbox[1]/2 +self.config['mainpad'][1][0]/2,image=self.photos[0],anchor=CENTER)]
         elif self.config['picsatatime']==2:
             self.picindex=[0,0]
 
@@ -130,7 +131,7 @@ class App:
             self.picindex[0]+=1
             if self.picindex[0] >= len(self.piclist):
                 self.picindex=[0]
-            self.imgs[0]=self.can.create_image(self.imgbbox[0]/2+self.config['mainpad'][0][0],self.imgbbox[1]/2 +self.config['mainpad'][1][0],image=self.photos[self.picindex[0]],anchor=CENTER)
+            self.imgs[0]=self.can.create_image(self.imgbbox[0]/2+self.config['mainpad'][0][0]/2,self.imgbbox[1]/2 +self.config['mainpad'][1][0]/2,image=self.photos[self.picindex[0]],anchor=CENTER)
         elif self.config['picsatatime']==2:
             for i in range(0,2):
                 self.picindex[i]+=1
