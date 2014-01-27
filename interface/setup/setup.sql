@@ -33,7 +33,7 @@ DROP TABLE IF EXISTS users;
 
 create table users (
 	ID int(8) unsigned NOT NULL auto_increment,
-	Permission int(1) NOT NULL DEFAULT 0,
+	Permission int(2) NOT NULL DEFAULT 0,
 	Name varchar(32) NOT NULL,
 	Uid varchar(20) NOT NULL,
 	Pass varchar (32) NOT NULL,
