@@ -160,7 +160,7 @@ class App:
             for i in self.config['directories']:
                 #print [os.listdir(i)]
                 temp+=[open(os.path.join(i,f)).read() for f in os.listdir(i) if f.endswith('.txt')]
-            self.tickerlist=self.config['delimiter'].join(temp).replace('\n','') if temp !=[] else self.tickerlist
+            self.tickerlist=self.config['delimiter'].join(temp).replace('\n',self.config['delimiter']) if temp !=[] else self.tickerlist
         except IOError as e:
             print "I/O error({0}): {1}".format(e.errno, e.strerror)
 
