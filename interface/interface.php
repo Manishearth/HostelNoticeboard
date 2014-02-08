@@ -1,20 +1,29 @@
 <?php
-define('UPLOAD_FILE',               0b00000001);
-define('DELETE_FILE',               0b00000010);
-define('ADD_DELETE_USER',           0b00000100);
-define('ADD_DELETE_PI',             0b00001000);
-define('APPROVE_UPLOAD',            0b00010000);
-//define('CREATE_DIRECTORY',          0b00100000);                              Not implemented
-//define('DELETE_DIRECTORY',          0b01000000);                              Not implemented
-//define('ADDITIONAL_PERMISSION',     0b10000000);                              Extra permission
+define('UPLOAD_FILE',               1);
+define('DELETE_FILE',               2);
+define('ADD_DELETE_USER',           4);
+define('ADD_DELETE_PI',             8);
+define('APPROVE_UPLOAD',            16);
+//define('CREATE_DIRECTORY',          32);                                      Not implemented
+//define('DELETE_DIRECTORY',          64);                                      Not implemented
+//define('ADDITIONAL_PERMISSION',     128);                                     Extra permission
+//define('ADDITIONAL_PERMISSION',     256);                                     Extra permission
+//define('ADDITIONAL_PERMISSION',     512);                                     Extra permission
+//define('ADDITIONAL_PERMISSION',     1024);                                    Extra permission
+define('ALLOW_HOSTEL',              2048);                                      //Not implemented
+define('ALLOW_TECHNICAL',           4096);                                      //Not implemented
+define('ALLOW_CULTURAL',            8192);                                      //Not implemented
+define('ALLOW_SPORTS',              16384);                                     //Not implemented
+define('ALLOW_ACADEMICS',           32768);                                     //Not implemented
 
 include 'backend/MySQL.class.php';                                              //Import MySQL Class
-include 'backend/config.inc';                                                   //Import default values for $remotepath, $path, 
-                                                                                //$dbUsername, $dbPassword, $asyncnumber
+include 'backend/config.inc';                                                   //Import some variables
+include 'backend/functions.inc';                                                //Import some functions
 
-$dbLink=new MySQL($dbUsername,$dbPassword);
+$dbLink=new MySQL($dbUsername,$dbPassword);                                     //Starting new MySQL connection
 
-//Basic cookie based authentication                                             //To be improved later
+//--------------Basic cookie based authentication------------//                 //To be improved later
+
 if ((isset($_POST["user"]))&&(isset($_POST["pass"]))&&($dbLink->getAuth($_POST["user"])==md5($_POST["pass"]))) {
   setcookie("user",$_POST["user"],time()+900);
   setcookie("auth",md5($_POST["pass"]),time()+600);
@@ -33,6 +42,7 @@ else {
   exit();
 }
 ?>
+
 <!DOCTYPE html>
 <html>
 <head>
@@ -163,6 +173,7 @@ if($dbLink->hasPerm($user,ADD_DELETE_PI)) {
                     <option value="0" disabled selected>Select Category</option>
 <?php
 //-------------------Get list of categories-------------//
+echo $path;
 $_files = $dbLink->getFileList($path);
 foreach ($_files[0] as &$folder)
     echo "                    <option value='$folder'>$folder</option>\n";
@@ -177,7 +188,7 @@ foreach ($_files[0] as &$folder)
             <label class="control-label col-lg-2">Hostel/Location</label>
             <div class="col-lg-3 ">
                 <select name="hostel" class="form-control select-picker" id="hostel" onChange="hostel_onChange()">
-                    <option value="0">All</option>
+<!------------------<option value="0">All</option>------>
 <?php
 //--------------------Get list of hostels--------------//
 $_hostels = $dbLink->getFileList($path."Hostel/");
@@ -188,7 +199,7 @@ foreach ($_hostels[0] as &$hostel)
             </div>
         </div>
         <!------------------Select file-------------------->
-        <div class="form-group" id="div_path" filter="task-upload task-delete task-mkdir">
+        <div class="form-group" id="div_path" filter="task-delete task-mkdir">
             <label class="control-label col-lg-2">File/Folder</label>
             <div class="col-lg-3" filter="task-delete">
                 <select name="delete-data" class="form-control select-picker">
@@ -216,23 +227,40 @@ foreach ($_hostels[0] as &$folder) {
             <div class="col-lg-3" filter="task-mkdir">
                 <input type="text" name="mkdir-data" value="" placeholder="" class="form-control">
             </div>
-            <div class="col-lg-6" filter="task-upload">
-                <input type="file" name="upload-data" style="padding: 8px 1px">
-            </div>
         </div>
-        <div class="form-group" id="div_expiry" filter="task-upload">
-            <label class="control-label col-lg-2">Expires in</label>
-            <div class="col-lg-3">
-                <select name="upload-expiry" class="form-control select-picker">
+        <div class="form-group" id="div_path" filter="task-upload" style="display: block;">
+            <label class="control-label col-lg-2">Poster file</label>
+            <div class="col-lg-6" filter="task-upload" style="display: block;">
+                <input type="file" name="upload-poster" style="padding: 8px 1px">
+                <input type="date" name="upload-poster-start-date" style="padding: 8px 1px" min=<?php echo "'$today'"; ?> value=<?php 
+echo "'$today'"; ?> required=true>
+                <select name="upload-poster-expiry" style="padding: 8px 1px">
 <?php
-for ($i=0;$i<$maxExpiry;$i++) {
-    $default=($i==$defaultExpiry)?"selected":"";
-		echo "                    <option value='$i' $default>$i days</option>";
+for ($i=1;$i<$maxExpiry["poster"];$i++) {
+    $default=($i==$defaultExpiry["poster"])?"selected":"";
+                echo "                    <option value='$i' $default>$i day(s)</option>";
 }
 ?>
-                </select>          
+                </select>
             </div>
-        </div>   
+        </div>
+        <div class="form-group" id="div_path" filter="task-upload" style="display: block;">
+            <label class="control-label col-lg-2">Text file</label>
+            <div class="col-lg-6" filter="task-upload" style="display: block;">
+                <input type="file" name="upload-text" style="padding: 8px 1px">
+                <input type="date" name="upload-text-start-date" style="padding: 8px 1px" min=<?php echo "'$today'"; ?> value=<?php echo 
+"'$today'"; ?> required=true>
+                <select name="upload-text-expiry" style="padding: 8px 1px">
+<?php
+for ($i=1;$i<$maxExpiry["text"];$i++) {
+    $default=($i==$defaultExpiry["text"])?"selected":"";
+                echo "                    <option value='$i' $default>$i day(s)</option>";
+}
+?>
+		</select>
+            </div>
+        </div>
+
         <div class="form-group" id="div_name" filter="task-add-user" style="display: block;">
             <label class="control-label col-lg-2">Name</label>
             <div class="col-lg-3">
@@ -320,7 +348,8 @@ foreach ($users as $auser) {
               <label class="control-label col-lg-2">IP</label>
               <div class="col-lg-3">
               <div class="input-group"><input name="pi-ip" type="text" class="form-control" value="10."/>
-              <span class="input-group-btn"><input type=text class="form-control" size=2 value=22 name="pi-port" style="min-width:60px;"></span>
+              <span class="input-group-btn"><input type=text class="form-control" size=2 value=22 name="pi-port" 
+style="min-width:60px;"></span>
               </div>
               </div>
             </div>
@@ -402,7 +431,9 @@ foreach ($pis as $pi) {
             }
         }
         if ($qitem->Type!='upload') $appText="-NA-";
-        echo "<tr class=approvaltr style='height: 40px;'><td class=approvaltd>".$qitem->Date ."</td><td class=approvaltd>".$qitem->Path ."</td><td class=approvaltd>".$qitem->Type ."</td><td>".$qitem->IP ."</td><td>".$qitem->Hostel."</td><td class=approvaltd data-type='".$qitem->Type."' data-path='".$qitem->Path ."'>".$appText."</td></tr>";
+        echo "<tr class=approvaltr style='height: 40px;'><td class=approvaltd>".$qitem->Date ."</td><td class=approvaltd>".$qitem->Path 
+."</td><td class=approvaltd>".$qitem->Type ."</td><td>".$qitem->IP ."</td><td>".$qitem->Hostel."</td><td class=approvaltd 
+data-type='".$qitem->Type."' data-path='".$qitem->Path ."'>".$appText."</td></tr>";
     }
 ?>
             </tbody>
@@ -410,7 +441,7 @@ foreach ($pis as $pi) {
         <script>
         function approveImg(path){
         console.log(path);
-          $.post('action.php',{'task':'Approve','path':path},function(data){
+          $.post('action.php',{'task':'approve','path':path},function(data){
             if(data!="true"){return;};
             var approved=$('td[data-path="'+path+'"][data-type="upload"]');
             var index;
@@ -435,4 +466,6 @@ foreach ($pis as $pi) {
   </div> 
 </body>
 </html>
+
+
 

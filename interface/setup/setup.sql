@@ -1,6 +1,4 @@
-CREATE DATABASE IF NOT EXISTS NoticeBoard;
-
-USE NoticeBoard;
+USE test;
 
 DROP TABLE IF EXISTS PI;
 

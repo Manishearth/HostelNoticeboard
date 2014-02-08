@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 clear
 echo "########################################################################################
 IITB Notice Board Server Side Setup Script
@@ -13,53 +13,49 @@ src="$(dirname ${BASH_SOURCE[0]})"
 src="$(cd "$src" && pwd)"
 
 echo $src
-read -p "Enter MySQL username:" uid
-stty -echo
-echo "Enter MySQL password:"
-read pass
-stty echo
 
 echo "Creating database..."
-mysql --user=$uid --password=$pass < "$src/setup.sql"
+mysql < "$src/setup.sql"
 echo "Writing default values..."
-mysql --user=$uid --password=$pass < "$src/default.sql"
+mysql < "$src/default.sql"
 
 path="$(cd "$src/../" && pwd)"
 
 echo "Installing in $path ..."
 
 echo "Generating config.inc ..."
-#echo "<?php" > "$path/backend/config.inc"
-#echo "\$remotepath="'~/'";" >> "$path/backend/config.inc"
-#echo "\$path='$path/root/';" >> "$path/backend/config.inc"
-#echo "\$dbUsername='$uid';"  >> "$path/backend/config.inc"
-#echo "\$dbPassword='$pass';" >> "$path/backend/config.inc"
-#echo "\$asyncnumber=1" >> "$path/backend/config.inc"
-#echo "?>" >> "$path/backend/config.inc"
-
-cat >$path/backend/config.inc << EOF
+cat > $path/backend/config.inc << EOF
 <?php
-\$remotepath='~/';
-\$path='$path/root/';
-\$dbUsername='root';
-\$dbPassword='toor';
-\$asyncnumber=1
-?>
+\$path         = '$path/root/';
+\$remotepath   = '~/.HostelNoticeboard/';
 
+\$dbUsername   = '';
+\$dbPassword   = '';
+
+\$asyncnumber  = 1;
+
+\$maxExpiry    = array(
+        "poster" => 7,
+        "text"   => 3
+);
+\$defaultExpiry= array(
+        "poster" => 5,
+        "text"   => 1
+);
+?>
 EOF
 
-
 mkdir "$path/root"
-mkdir "$path/root/Academics"
+mkdir "$path/root/Academic"
 mkdir "$path/root/Cultural"
 mkdir "$path/root/Sports"
 mkdir "$path/root/Hostel"
+mkdir "$path/root/Technical"
 
-
-echo "Creating cronjob..."
-crontab -l > currentcron
-echo "0 */4 * * *php $path/backend/daemon.php" >> currentcron
-crontab currentcron
-rm currentcron
+#echo "Creating cronjob..."
+#crontab -l > currentcron
+#echo "0 */4 * * *php $path/backend/daemon.async.php" >> currentcron
+#crontab currentcron
+#rm currentcron
 
 echo "Installation successful if you saw no errors :P"

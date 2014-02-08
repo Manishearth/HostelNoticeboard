@@ -4,7 +4,7 @@ class MySQL
 	private $dbUsername;
 	private $dbPassword;
 	private $dbHost='localhost';
-	private $dbName='NoticeBoard';
+	private $dbName='test';
 	private $dbLink;
 	
 	function MySQL($dbUsername, $dbPassword) {$this->connect($dbUsername, $dbPassword);}																//Constructor
@@ -14,7 +14,7 @@ class MySQL
 	 * Method to connect to database *
 	 *********************************/
 	private function connect($dbUsername, $dbPassword) {	
-		$this->pdb=new PDO("mysql:host=$this->dbHost;dbname=$this->dbName", $dbUsername, $dbPassword);
+		$this->pdb=new PDO("mysql:host=$this->dbHost;dbname=$this->dbName");
 		$this->dbLink = new mysqli($this->dbHost, $dbUsername, $dbPassword, $this->dbName);
 		if (mysqli_connect_error()) {
 		user_error("MySQL Error: ".mysqli_connect_errno() . '. ' . mysqli_connect_error());
@@ -42,10 +42,16 @@ class MySQL
 		}
 		return $result;
 	}
+	public $error=0;
 	function pquery($sql,$arr)
 	{
+		$this->error=0;
 		$stmt = $this->pdb->prepare($sql);
-		$stmt->execute($arr);
+//		$stmt->execute($arr);
+		if (!$stmt->execute($arr)) {
+		        print_r($stmt->errorInfo());
+			$this->error=1;
+    		}
 		return $stmt;
 	}
 
@@ -54,14 +60,22 @@ class MySQL
 //DONOT UNCOMMENT THESE LINES
 //THESE LINES ARE JUST FOR REFERENCE
 //
-//define('UPLOAD_FILE',               0b00000001);
-//define('DELETE_FILE',               0b00000010);
-//define('ADD_DELETE_USER',           0b00000100);
-//define('ADD_DELETE_PI',             0b00001000);
-//define('APPROVE_UPLOAD',            0b00010000);
-//define('CREATE_DIRECTORY',          0b00100000);                              Not implemented
-//define('DELETE_DIRECTORY',          0b01000000);                              Not implemented
-//define('ADDITIONAL_PERMISSION',     0b10000000);                              Extra permission
+//define('UPLOAD_FILE',               1);
+//define('DELETE_FILE',               2);
+//define('ADD_DELETE_USER',           4);
+//define('ADD_DELETE_PI',             8);
+//define('APPROVE_UPLOAD',            16);
+//define('CREATE_DIRECTORY',          32);                                      Not implemented
+//define('DELETE_DIRECTORY',          64);                                      Not implemented
+//define('ADDITIONAL_PERMISSION',     128);                                     Extra permission
+//define('ADDITIONAL_PERMISSION',     256);                                     Extra permission
+//define('ADDITIONAL_PERMISSION',     512);                                     Extra permission
+//define('ADDITIONAL_PERMISSION',     1024);                                    Extra permission
+//define('ADDITIONAL_PERMISSION',     2048);                                    Extra permission
+//define('ADDITIONAL_PERMISSION',     4096);                                    Extra permission
+//define('ADDITIONAL_PERMISSION',     8192);                                    Extra permission
+//define('ADDITIONAL_PERMISSION',     16384);                                   Extra permission
+//define('ADDITIONAL_PERMISSION',     32768);                                   Extra permission
 
 	/**********************************************
 	 * Custom methods for frontend user interface *
@@ -78,7 +92,8 @@ class MySQL
 	function hasPerm($Uid,$_Perm) {
 		$result=false;
 		if ($result=$this->pquery("SELECT * from users where Uid=:uid",array('uid'=>$Uid))) {;}
-		$Perm=$result->fetch()['Permission'];
+		$Perm=$result->fetch();
+		$Perm=$Perm['Permission'];
 		if ($Perm & $_Perm) return true;
 		else return false;
 	}
@@ -120,12 +135,12 @@ class MySQL
 	function addUser($name, $uid, $pass, $perm) {
 //		$_pass=md5($pass);
 		$_pass=$pass;
-		$_perm=0x00000000;
-		if ($perm[UPLOAD_FILE] == true) 		$_perm = $_perm|0x00000001;
-		if ($perm[DELETE_FILE] == true) 		$_perm = $_perm|0x00000010;
-		if ($perm[ADD_DELETE_USER] == true) 		$_perm = $_perm|0x00000100;
-		if ($perm[ADD_DELETE_PI] == true) 		$_perm = $_perm|0x00001000;
-		if ($perm[APPROVE_UPLOAD] == true) 		$_perm = $_perm|0x00010000;
+		$_perm=0;
+		if ($perm[UPLOAD_FILE] == true) 		$_perm = $_perm + 1;
+		if ($perm[DELETE_FILE] == true) 		$_perm = $_perm + 2;
+		if ($perm[ADD_DELETE_USER] == true) 		$_perm = $_perm + 4;
+		if ($perm[ADD_DELETE_PI] == true) 		$_perm = $_perm + 8;
+		if ($perm[APPROVE_UPLOAD] == true) 		$_perm = $_perm + 16;
 
 		return $this->pquery("INSERT INTO users(Name,Uid,Pass,Permission) VALUES (:name,:uid,:pass,:permission)",array('name'=>$name,'uid'=>$uid,'pass'=>$_pass,'permission'=>$_perm));
 	}
@@ -139,7 +154,7 @@ class MySQL
 	function addPi($IP, $Hostel, $Uid, $Pass, $Port) {
 //		$_Pass=md5($Pass);
 		$_Pass=$Pass;
-		return $this->pquery("INSERT INTO PI(IP, Hostel, Uid, Pass, Port) VALUES (:ip, :hostel, :uid, :pass, :port)",array('ip'=>$IP,'hostel'=>$Hostel,'uid'=>$Uid,'pass'=>$_Pass,'port'=>$Port));
+		return $this->pquery("INSERT INTO PI (IP, Hostel, Uid, Pass, Port) VALUES (:ip, :hostel, :uid, :pass, :port)",array('ip'=>$IP,'hostel'=>$Hostel,'uid'=>$Uid,'pass'=>$_Pass,'port'=>$Port));
 	}
 	function removePi($IP) {
 		$this->pquery("DELETE FROM PI WHERE PiID = :ip",array('ip'=> $IP));
@@ -158,7 +173,7 @@ class MySQL
 		return $queue;		
 	}
 	function getFileList($path) {
-		$_files = [];
+		$_files = array();
 		$folders = scandir($path);
 		$_files[0] = array_slice($folders,2);
 		foreach ($_files[0] as &$folder) {
@@ -171,9 +186,9 @@ class MySQL
 	/**************************************
 	 * Custom methods for common frontend *
 	 **************************************/
-	function queueTask($task,$path,$user,$hostel,$approve,$expiry="") {
-		if ($task=='delete' && $approve=='0') {
-			if (!is_numeric($expiry)) $expiry=5;
+	function 
+queueTask($task,$path,$user,$hostel,$approve,$expiry="") {
+		if (is_numeric($expiry)){
 			$stmt="INSERT INTO queue(Type,Path,Date,PiID,User,Approved) VALUES (:type,:path,NOW() + interval $expiry day,:piid ,:user, :approved)";
 		}
 		else
@@ -216,11 +231,10 @@ class MySQL
 		return $this->_result_e->fetch(PDO::FETCH_OBJ);
 	}
 	function directiveSuccess($_object) {
-		$this->pquery("DELETE FROM queue where ID = :ID",array('ID'=>$_object->ID));
-		/*if (mysqli_error($this->dbLink)){
-			user_error("MySQL Error: ".mysqli_errno($this->dbLink) . ': ' . mysqli_error($this->dbLink));
-			return false;
-		}*/
+		if ($_object->Type="delete"){
+			$this->pquery("DELETE FROM queue where Path = :path AND Type='delete'",array('path'=>$_object->Path));
+		}
+		else $this->pquery("DELETE FROM queue where ID = :ID",array('ID'=>$_object->ID));
 		return true;
 	}
 	
@@ -255,13 +269,15 @@ class MySQL
 	//Gets lock status
 	function getPiLockStatus($_PiID){
 		$res=$this->pquery("Select PendLock from PI where PiID=:piid",array('piid'=>$_PiID));
-		return $res->fetch(PDO::FETCH_ASSOC)["PendLock"];
+		$ret=$res->fetch(PDO::FETCH_ASSOC);
+		return $ret['PendLock'];
 	}
 	
 	//Gets a list of Pis that are pending in the current async daemon run, and not being used ("locked") by any backend.php calls
 	function getPendingUnlockedPis(){
 		$res=$this->query("SELECT PiID from PI where PendLock=1");
-		return $res->fetch_assoc()["PiID"];
+		$ret=$res->fetch_assoc();
+		return $ret['PiID'];
 	}
 }
 ?>
