@@ -232,8 +232,20 @@ foreach ($_hostels[0] as &$folder) {
             <label class="control-label col-lg-2">Poster file</label>
             <div class="col-lg-6" filter="task-upload" style="display: block;">
                 <input type="file" name="upload-poster" style="padding: 8px 1px">
+
+            </div>
+        </div>
+        <div class="form-group" id="div_path" filter="task-upload" style="display: block;">
+            <label class="control-label col-lg-2">Start date</label>
+            <div class="col-lg-3" filter="task-upload" style="display: block;">
+
                 <input type="date" name="upload-poster-start-date" style="padding: 8px 1px" min=<?php echo "'$today'"; ?> value=<?php 
 echo "'$today'"; ?> required=true>
+
+            </div>
+            <div class="col-lg-3" filter="task-upload" style="display: block;">
+
+ <label class="control-label" style="padding-right:10px">Expires after</label>
                 <select name="upload-poster-expiry" style="padding: 8px 1px">
 <?php
 for ($i=1;$i<$maxExpiry["poster"];$i++) {
@@ -248,8 +260,20 @@ for ($i=1;$i<$maxExpiry["poster"];$i++) {
             <label class="control-label col-lg-2">Text file</label>
             <div class="col-lg-6" filter="task-upload" style="display: block;">
                 <input type="file" name="upload-text" style="padding: 8px 1px">
+            </div>
+        </div>
+         
+        <div class="form-group" id="div_path" filter="task-upload" style="display: block;">
+            <label class="control-label col-lg-2">Start date</label>
+  
+                <div class="col-lg-3" filter="task-upload" style="display: block;">
+                    
                 <input type="date" name="upload-text-start-date" style="padding: 8px 1px" min=<?php echo "'$today'"; ?> value=<?php echo 
 "'$today'"; ?> required=true>
+
+            </div>
+                <div class="col-lg-3" filter="task-upload" style="display: block;">
+ <label class="control-label" style="padding-right:10px">Expires after</label>
                 <select name="upload-text-expiry" style="padding: 8px 1px">
 <?php
 for ($i=1;$i<$maxExpiry["text"];$i++) {
@@ -260,7 +284,6 @@ for ($i=1;$i<$maxExpiry["text"];$i++) {
 		</select>
             </div>
         </div>
-
         <div class="form-group" id="div_name" filter="task-add-user" style="display: block;">
             <label class="control-label col-lg-2">Name</label>
             <div class="col-lg-3">
