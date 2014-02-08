@@ -7,10 +7,11 @@
    "refreshcount":{"1":10,"2":10,"4":10},
    "picspeed":2000,
    "directories":[
-      "Cult",
+      "Cultural",
       "Sports",
-      "Tech",
-      "Hostel"
+      "Technical",
+      "Hostel",
+      "Academics"
    ],
    "tickerpad":[0,2],
    "tickerstyle":["white",["Helvectica","24"]],
