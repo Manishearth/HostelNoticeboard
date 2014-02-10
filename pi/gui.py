@@ -19,18 +19,18 @@ class App:
     def __init__(self, master):
         print "Starting Noticeboard: " + (datetime.datetime.fromtimestamp(int("1284101485")).strftime('%Y-%m-%d %H:%M:%S'))
         
-        self.config={'directories':['Cult','Sports','Tech','Hostel'],
+        self.config={'directories':['Academics','Cultural','Sports','Technical','Hostel'],
         'delimiter':"         ",
         'tickerspeed':[1,10], # x pixels per y milliseconds
         'tickerpad':[0,2], #lower, upper
-        'tickerstyle':['white',("Helvectica", "18")], #fill,font(face,size)
-        'canvasbg':'black',
-        'tickerrectcolor':'red',
+        'tickerstyle':['white',("Helvectica", "24")], #fill,font(face,size)
+        'canvasbg':'white',
+        'tickerrectcolor':'black',
         'picspeed':2000, #Switch images every x seconds
         'picsatatime':4, # 1,2, or 4
         'tilingpad':[2,2], #horiz,vert
         'refreshcount':{1:10,2:10,4:10}, #After how many iterations ought I refresh? [PAT1,PAT2,PAT3]
-        'mainpad':[[10,10],[50,10]], #Central canvas margins, [[left,right],[top,bottom]]
+        'mainpad':[[1,1],[50,1]], #Central canvas margins, [[left,right],[top,bottom]]
          'logoscale':[200,40] 
         }
         try:
