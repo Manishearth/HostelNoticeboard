@@ -4,9 +4,9 @@ HostelNoticeboard
 Electronic noticeboard for IIT Bombay hostels. Meant to run on a Raspberry Pi.
 ##Requirements
 
-Python Tkinter and Python Imaging Library
+Python Tkinter and Python Imaging Library, as well as `x11-xserver-utils` for the `xset` command
 ```
-sudo apt-get install python-tk python-imaging
+sudo apt-get install python-tk python-imaging x11-xserver-utils
 ```
 
 ##Usage
