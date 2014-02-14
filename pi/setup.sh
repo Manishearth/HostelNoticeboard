@@ -14,4 +14,18 @@ chvt 1
 /sbin/getty --noclear 38400 tty1
 EOF
 
-#TODO: http://raspberrypi.stackexchange.com/questions/752/how-do-i-prevent-the-screen-from-going-blank
+# http://raspberrypi.stackexchange.com/questions/752/how-do-i-prevent-the-screen-from-going-blank
+
+sudo cat >/etc/X11/xinit/.xinitrc <<EOF
+#!/bin/sh
+
+# /etc/X11/xinit/.xinitrc
+#
+# global xinitrc file, used by all X sessions started by xinit (startx)
+
+xset s off         # don't activate screensaver
+xset -dpms         # disable DPMS (Energy Star) features.
+xset s noblank     # don't blank the video device
+# invoke global X session script
+. /etc/X11/Xsession
+EOF
