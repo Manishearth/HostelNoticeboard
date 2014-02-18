@@ -29,3 +29,5 @@ xset s noblank     # don't blank the video device
 # invoke global X session script
 . /etc/X11/Xsession
 EOF
+
+echo Be sure to add a ping to backend.sh in the crontab
