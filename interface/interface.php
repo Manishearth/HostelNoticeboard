@@ -453,9 +453,9 @@ foreach ($pis as $pi) {
                 $appText="Pending";
             }
         }
+        $Path=$qitem->Path;
         if ($qitem->Type!='upload') $appText="-NA-";
-        echo "<tr class=approvaltr style='height: 40px;'><td class=approvaltd>".$qitem->Date ."</td><td class=approvaltd>".$qitem->Path 
-."</td><td class=approvaltd>".$qitem->Type ."</td><td>".$qitem->IP ."</td><td>".$qitem->Hostel."</td><td class=approvaltd 
+        echo "<tr class=approvaltr style='height: 40px;'><td class=approvaltd>".$qitem->Date ."</td><td class=approvaltd><a href='root/$Path'>$Path</a></td><td class=approvaltd>".$qitem->Type ."</td><td>".$qitem->IP ."</td><td>".$qitem->Hostel."</td><td class=approvaltd 
 data-type='".$qitem->Type."' data-path='".$qitem->Path ."'>".$appText."</td></tr>";
     }
 ?>
