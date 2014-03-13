@@ -130,6 +130,7 @@ else {
             <li id="page-task-li" class="active">   <a id="page-task-btn"  style="cursor: pointer;">Add Task</a> </li>
             <li id="page-history-li">               <a id="page-history-btn" style="cursor: pointer;">Show History</a></li>
             <li id="page-browse-li">                <a id="page-browse-btn" href="root/">Browse Files</a></li>
+            <li id="page-browse-li">                <a id="page-browse-btn" href="logout.php">Logout</a></li>
         </ul>
     </div>
     <!------------------Add Task Page-------------------->
